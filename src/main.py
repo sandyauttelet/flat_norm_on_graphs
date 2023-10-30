@@ -47,18 +47,10 @@ def main():
 
     edges = g.make_complete(graph)
     G = g.euclidean_graph(graph,edges)
-
-    # k is number of neighbors to take
-    # set lower to run faster but with worse accuracy
-    reduced = g.knn_reduced_graph(G, k=4)
+    reduced = g.knn_reduced_graph(G, 24)
     opt.get_graph_weights(reduced)
     t1 = perf_counter()
-
-    # lambda is bound on the curvature of the solution
-    # setting it high will reconstruct the image exactly
-    # small will make it disappear or lose fidelity
-    reduced = g.min_cut_max_flow(reduced,in_set,lamb=30)
-
+    reduced = g.min_cut_max_flow(reduced,in_set,30)
     t2 = perf_counter()
     print(f"Min cut max flow took {t2-t1} seconds to run")
     xs,ys=[],[]
@@ -71,8 +63,13 @@ def main():
         ys.append(y)
     plt.figure()
     plt.scatter(xs, ys)
-    plt.show()
+    
+cProfile.run('main()', 'results')
 
-if __name__ == "__main__":
-    main()
+import pstats
+
+with open('results.txt', 'w') as file:
+    profile = pstats.Stats('results', stream=file)
+    profile.print_stats()
+    file.close()
 
