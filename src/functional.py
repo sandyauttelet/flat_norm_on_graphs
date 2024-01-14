@@ -80,20 +80,10 @@ def construct_weights_system(u):
     return A,b
 
 def solve_weights_system(u):
-    # t0 = time()
+    #print("edges list in solve_weight_sys:", u)
     A,b = construct_weights_system(u)
-    # t1 = time()
-    # result = np.linalg.solve(A,b)
-    # t2 = time()
-    # ax = b
-    # x = a^-1b
-    # pinv = np.linalg.pinv(A)
-    # res = pinv @ b
     res = np.linalg.lstsq(A,b,rcond=None)[0]
-    #At = A.T
-    #res = np.linalg.solve(At@A,At@b)
-    #print("Time to construct:", t1-t0, "Time to solve:", t2-t1 )
-    return res   
+    return res 
 
 def get_num_integral(u,k,m):
     return cp.integrate(integrand_2d, 0, 2*np.pi,([u[k]],[u[m]]),itermax=50)[0]
@@ -132,7 +122,7 @@ def compare_with_paper():
                       ,(-2.0,1.0),(-1.0,2.0),(1.0,2.0),(2.0,1.0)\
                           ,(2.0,-1.0),(1.0,-2.0),(-1.0,-2.0),(-2.0,-1.0)])
     result = solve_weights_system(u)
-    print("Ours: ", [round(result[0],4),round(result[5],4),round(result[9],4)])
+    print("Ours: ", [result[0],result[5],result[9]])
     print("KRV: ", [0.1221, 0.0476, 0.0454])
     return u,result
     
@@ -146,9 +136,6 @@ if __name__ == '__main__':
     widths = [np.linalg.norm(entry) for entry in u]
     u,v = u[:,0],u[:,1]
     quiver(x,y,u,v,linewidths = widths)
-
-
-
 
     
     

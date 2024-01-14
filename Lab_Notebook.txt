@@ -1,0 +1,11 @@
+1/13/2024
+-----------------------------
+1. Merged divide and conquer voronoi code into main code, called from optimizer.py
+2. Note G.nodes is passing funny stuff, needed to convert it to list to fix bug
+3. Is faster but still somewhat slow, potentially optimize via flood-fill algorithm
+4. Last estimate for 2pi is 6.117158723854214 from using 30x30 grid and 24 nearest neighbors
+5. Next programming to do is test cases for paper
+perimeter of circle
+perimeter of box
+perimeter of sphere
+pathological cases (too close to boundary of grid, etc)

@@ -47,7 +47,6 @@ def comp_linsolve_to_newtonsolve(nodes,plot=True):
 nodes = [(0.0,0.0),(1.0,1.0),(1.0,0.0),(0.0,1.0)]
 
 comp_linsolve_to_newtonsolve(nodes)
-    
 
 # =============================================================================
 # vertices sampled from the unit circle                        

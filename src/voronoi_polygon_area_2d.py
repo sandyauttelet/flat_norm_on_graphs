@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from tqdm import tqdm
+from time import perf_counter
+
 class Voronoi_Region:
     def __init__(self,point):
         self.point = np.array(point)
@@ -38,7 +41,7 @@ def find_voronoi_polygon_areas(points,N=100000, plot=True):
     x_range, y_range, total_area = get_bounding_box(points)
     sample_points = get_sample(x_range, y_range, N)
     plt.figure()
-    for point in sample_points:
+    for point in tqdm(sample_points):
         add_sample_region(point,regions,total_area,N,plot)
     if plot:
         for region in regions:
@@ -51,14 +54,19 @@ def find_voronoi_polygon_areas(points,N=100000, plot=True):
                              color='black')
         plt.scatter(*zip(*points),c=[[0,0,0]])
         plt.show()
-    return regions
+    result = {tuple(region.point):region.area for region in regions}
+    return result
 
 # =============================================================================
 # generate a regular grid from (-1,-1) to (1,1)
 # =============================================================================
 #points = [(float(x),float(y)) for x in range(-1,2) for y in range(-1,2)]
 
-#solution = find_voronoi_polygon_areas(points)
+x,y = np.linspace(-2,2,30), np.linspace(-2,2,30)
+points = [(xi,yi) for xi in x for yi in y ]
+t1 = perf_counter()
+solution = find_voronoi_polygon_areas(points)
+print(perf_counter()-t1)
 
 # =============================================================================
 # transform regular grid into a non-regular grid
@@ -74,13 +82,16 @@ def find_voronoi_polygon_areas(points,N=100000, plot=True):
 # =============================================================================
 # generate random set of integer points
 # =============================================================================
-np.random.seed(3)
-for i in range(5):
-    points_x = np.random.randint(-5,5,5)
-    points_y = np.random.randint(-5,5,5)
-    points = list(zip(points_x,points_y))
-    
-    solution = find_voronoi_polygon_areas(points)
+# if __name__ == 'main':
+#     np.random.seed(3)
+#     for i in range(1):
+#         points_x = np.random.randint(-5,5,5)
+#         points_y = np.random.randint(-5,5,5)
+#         points = list(zip(points_x,points_y))
+        
+#         solution = find_voronoi_polygon_areas(points)
 
-for region in solution:
-    print(region)
+#     for region in solution:
+#         print(region)
+
+
