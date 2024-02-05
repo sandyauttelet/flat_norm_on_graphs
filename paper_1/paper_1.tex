@@ -2,6 +2,7 @@
 \usepackage{amsmath, amsthm, amssymb, amsfonts}
 \usepackage{hyperref}
 \usepackage{graphicx}
+\usepackage{float}
 
 \DeclareMathOperator*{\argmin}{argmin}
 
@@ -28,13 +29,13 @@ In 2005, Chan and Esedoglu introduced an edge preserving total variation regular
 F_{CE}(u) = \int_\Omega |\nabla u dx + \lambda \int_{\Omega} |u-f|dx
 \end{equation}
 
-Where $\Omega$ is a domain on which we have greyscale data $f:\Omega \to \mathbb{R}$ we would like to denoise. Solving the above we obtain:
+Where $\Omega$ is a domain on which we have greyscale data $f:\Omega \to \mathbb{R}$ we would like to denoise. Solving the associated minimization problem above we obtain:
 
 \begin{align*}
 u^* = \argmin_u F_{CE}(u)
 \end{align*}
 
-Which yields the denoised greyscale approximation $u^*:\Omega \to \mathbb{R}$ to the data $f$. The strength of the denoising may be adjusted by the parameter $\lambda \in [0,\infty)$, a large value of $\lambda$ corresponds to enacting a strict penalty for candidates $u$ that deviate too far from the original data and thus enforce less denoising. We henceforth refer to (\ref{ce}) as the $L^1$TV functional.
+Which is the denoised greyscale approximation $u^*:\Omega \to \mathbb{R}$ to the data $f$. The strength of the denoising may be adjusted by the parameter $\lambda \in [0,\infty)$, a large value of $\lambda$ corresponds to enacting a stricter penalty for candidates $u$ that deviate too far from the original data and thus enforce less denoising. We henceforth refer to (\ref{ce}) as the $L^1$TV functional.
 
 It was recognized in \cite{Morgan_2007} by Simon Morgan and Kevin Vixie that the $L^1$TV functional was both a special case of and an extension of the flat norm in geometric measure theory (GMT). Work was done in \cite{shapes} by Kevin Vixie Et al. to explore the implications of this.
 
@@ -67,26 +68,91 @@ A particular cut of this graph corresponds has a capacity equal to the value of 
 
 The vector of weights $w^*$ calculated in \cite{shapes} were chosen more specifically to approximate the function $g_\theta:\mathbb{R}^2 \to \mathbb{R}$ whose gradient is $\nabla g_\theta = (\cos \theta, \sin \theta)^T$ for all $\theta$:
 
-\begin{equation}
+\begin{equation} \label{oldmin}
 w^* = \argmin_w \int_0^{2\pi} (h(w,\theta)-1)^2 d\theta
 \end{equation}
 
 With
 
 \begin{align*}
-h(w,\omega) &= \sum_{j=1}^4 w_1 |\nabla g_\theta \cdot v_j| + \sum_{j=5}^8 w_2 |\nabla g_\theta \cdot v_j| +  \sum_{j=9}^{16} w_4 |\nabla g_\theta \cdot v_j|
+h(w,\omega) &= \sum_{j=1}^4 w_1 |\nabla g_\theta \cdot v_j| + \sum_{j=5}^8 w_2 |\nabla g_\theta \cdot v_j| +  \sum_{j=9}^{16} w_3 |\nabla g_\theta \cdot v_j|
 \end{align*}
 
 Where $v_j, j= 1,...,16$ are the vectors from a fixed point in the grid to its 16 nearest neighbors, where three types of neighbor groupings are identified as below.
 
-\begin{figure}
+\begin{figure}[H]
 \centering
 \includegraphics[scale=0.25]{Figure_2_Vixie_Paper.png}
 \caption{16 vector neighborhood from \cite{shapes}.}
 \end{figure}
 
+Equation (\ref{oldmin}) was solved analytically to obtain weights $(w_1,w_2,w_3) \approx (0.1221,0.0476,0.0454)$. 
+
 
 \section{Flat Norm on Arbitrary 2D and 3D Graphs}
+
+In the present work, we extend the multiscale flat norm computation to arbitrary graphs embedded in $\mathbb{R}^n$ using the framework above, and provide code to calculate explicitly in $\mathbb{R}^2$ and $\mathbb{R}^3$.
+
+Let $V = \{v_1,...,v_N\}$ be a set of vertices in $\mathbb{R}^n$ with a set symmetric edges $E$ on $V$. Fix a particular vertex $v \in V$ with degree $D$ and associated connected $\{u_i, i = 1,...,D\}$. We will provide a scheme for calculating the edge weights $\{w_i, i = 1,...,D\}$ that both recover the weights obtained in (\ref{oldmin}) in the case of a regular unit grid but extend to arbitrary irregular grids and connections. Our weights will be chosen to minimize the distance (in the $L^2$ sense) between the linear approximation of a weighted sum of the edges and the total variation over $\partial B(0,1)$, the unit sphere at the origin:
+
+\begin{align*}
+\mathcal{F}(w_1,w_2,...,w_D) := \int_{\partial B(0,1)} \left|\sum_{i=1}^D w_i |\langle \nu, u_i \rangle| - \| \nu \| \right|^2d\nu
+\end{align*}
+
+Which expands into the quadratic:
+
+\begin{align*}
+\mathcal{F}(w_1,w_2,...,w_D) &= \sum_{i=1}^D w_i^2C_1^i + 2 \sum_{i=1}^D \sum_{j=1}^{i-1} w_i w_j C_3^{ij} - 2 \sum_{i=1}^D w_i C_2^i + \alpha(n)
+\end{align*}
+
+Where $\alpha(n) = \int_{\partial B(0,1)}d\nu$ is the $n$-dimensional measure of the unit $n$ sphere, with:
+
+\begin{align*}
+C_1^i &:= \int_{\partial B(0,1)} |\langle \nu,u_i \rangle|^2 d\nu\\
+C_2^i &:= \int_{\partial B(0,1)} |\langle \nu,u_i \rangle| d\nu\\
+C_3^{ij} &:= \int_{\partial B(0,1)} |\langle \nu,u_i \rangle \langle \nu, u_j \rangle| d\nu
+\end{align*}
+
+The function above is convex, and thus we minimize it by calculating the gradient:
+
+\begin{align*}
+	\frac{\partial \mathcal{F}}{\partial \omega_k}  &= 2 \omega_k C_1^k + 2 \sum_{m=1}^{D}\omega_{m}C_{3}^{km} - 2\omega_kC_3^{kk} - 2 C_2^k\\
+\end{align*}
+
+Which forms a linear system of $D$ equations in $D$ unknowns. WLOG this system may be presumed nonsingular, as if two edges $u_n$ and $u_m$ are linearly dependent, by scaling and symmetry they will receive the same weight and thus one may be safely removed from the calculation. Thus we can simply solve our system for the stationary point:
+
+\begin{align*}
+2 \omega_1 C_1^1 + 2 \sum_{m=2}^{D}\omega_{m}C_{3}^{1m}  - 2 C_2^1 &= 0\\
+\vdots \hspace{20mm} & \\
+2 \omega_D C_1^D + 2 \sum_{m=1}^{D-1}\omega_{m}C_{3}^{Dm} - 2 C_2^D &= 0\\
+\end{align*}
+
+If needed, the Hessian may also be quickly calculated:
+
+\begin{align*}
+\frac{\partial^2 \mathcal{F}}{\partial \omega_k \partial \omega_\ell} &= \begin{cases}
+2C_1^k & \text{ if } \ell = k\\
+2C_3^{k\ell} & \text{ otherwise}
+\end{cases}
+\end{align*}
+
+Thus the problem reduces to calculation of $C_1^i$, $C_2^i$ and $C_3^{ij}$. We provide the following table of values:
+
+\begin{figure}[H]
+\centering
+\begin{tabular}{|c|c|c|c|}
+\hline
+ &  2D  & 3D  \\
+\hline
+ $C_1^i$ & $\pi \| u_i \|^2$  & $\frac{4\pi}{3}\|u_i\|^2$   \\
+\hline
+ $C_2^i$ & $4\| u_i \|$  & $2\pi \|u_i\|$    \\
+\hline
+ $C_3^{ij}$ & Numerical  & Numerical    \\
+\hline
+\end{tabular}
+\end{figure}
+
 
 \section{Tests}
 
