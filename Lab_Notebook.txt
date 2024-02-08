@@ -9,3 +9,8 @@ perimeter of circle
 perimeter of box
 perimeter of sphere
 pathological cases (too close to boundary of grid, etc)
+
+estimate for perimeter of circle
+6.117158723854214 using 30x30 grid with 24 nearest neighbors
+
+need to make test for perimeter of sphere

@@ -2,4 +2,4 @@
 \contentsline {section}{\numberline {2}Discrete Implementations}{2}{section.2}%
 \contentsline {section}{\numberline {3}Flat Norm on Arbitrary 2D and 3D Graphs}{4}{section.3}%
 \contentsline {section}{\numberline {4}Tests}{6}{section.4}%
-\contentsline {section}{\numberline {5}Edge Cases}{6}{section.5}%
+\contentsline {section}{\numberline {5}Edge Cases}{8}{section.5}%

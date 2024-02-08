@@ -57,7 +57,6 @@ def get_bounding_box(points):
     return [(x_range[1],y_range[1]),(x_range[1],y_range[0]),(x_range[0],y_range[0]),(x_range[0],y_range[1])]
 
 def calculate_voronoi_area(points):
-    print(points)
     bounding_box = get_bounding_box(points)
     point_areas = {tuple(point):0 for point in points}
     """
@@ -80,7 +79,6 @@ def calc_dist(x,y):
     return np.sqrt((x[0]-y[0])**2+(x[1]-y[1])**2)
 
 def nearest_point(point,points):
-    print(type(point), type(points))
     nearest = np.argmin([calc_dist(point,entry) for entry in points])
     return points[nearest]
 

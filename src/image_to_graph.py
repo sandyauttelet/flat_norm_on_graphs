@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-img_path = '50x50.png'
+img_path = 'Circles.png'
 
 def primitive_threshold(image,black_white_tolerance):
     if image < black_white_tolerance:
@@ -35,7 +35,7 @@ def image_to_graph(img_path,black_white_tolerance=255//2):
     plt.figure(0)
     plt.imshow(img)
     plt.figure(1)
-    plt.scatter(grid_x_indices, grid_y_indices)
+    #plt.scatter(grid_x_indices, grid_y_indices)
     plt.scatter(img_x_indices, img_y_indices)
     return grid2graph(grid_x_indices,grid_y_indices),list(zip(img_x_indices,img_y_indices))
 
@@ -64,27 +64,8 @@ def plot_graph_as_image(G):
 # print(xs)
 # #plt.scatter(xs,ys)
 
-    
-# grid,_ = image_to_graph(img_path)
-# xs,ys = [],[]
-# for x in grid:
-#     xs.append(x[0])
-#     ys.append(x[1])
-#     print(x)
-# plt.scatter(xs,ys)
-# import time 
-# v = 50*50
-# e = v//2 - 1
-# t2 = time.time()
-# for i in range(v):
-#     A = np.random.randn(e,e)
-#     b = np.random.randn(e)
-#     t0 = time.time()
-#     #inv = np.linalg.pinv(A)
-#     #res = np.linalg.lstsq(A,b)
-#     at = A.T
-#     res = np.linalg.solve(at@A,at@b)
-#     t1 = time.time()
-#     print(t1-t0)
-# t3 = time.time()
-# print(t3-t1)
+if __name__ == "__main__":
+    # TODO: there is some bug with non square images
+    grid,_ = image_to_graph(img_path)
+    plt.show()
+    #plot_graph_as_image(grid)

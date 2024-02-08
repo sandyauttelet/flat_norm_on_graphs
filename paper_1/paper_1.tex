@@ -3,6 +3,7 @@
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{float}
+\usepackage{xcolor}
 
 \DeclareMathOperator*{\argmin}{argmin}
 
@@ -26,7 +27,7 @@ In this paper we implement and test a method for computing the multiscale flat n
 In 2005, Chan and Esedoglu introduced an edge preserving total variation regularization functional:
 
 \begin{equation} \label{ce}
-F_{CE}(u) = \int_\Omega |\nabla u dx + \lambda \int_{\Omega} |u-f|dx
+F_{CE}(u) = \int_\Omega |\nabla u| dx + \lambda \int_{\Omega} |u-f|dx
 \end{equation}
 
 Where $\Omega$ is a domain on which we have greyscale data $f:\Omega \to \mathbb{R}$ we would like to denoise. Solving the associated minimization problem above we obtain:
@@ -42,7 +43,7 @@ It was recognized in \cite{Morgan_2007} by Simon Morgan and Kevin Vixie that the
 
 \section{Discrete Implementations}
 
-If $\chi_E$ is the characteristic function of $E$, with $\chi_E(x) = 1$ if $x \in E$ and $0$ otherwise, and $u$ may be taken to be of this form, then the $L^1$TV functional in (\ref{ce}) reduces to:
+Let $\chi_E$ is the characteristic function of $E$, with $\chi_E(x) = 1$ if $x \in E$ and $0$ otherwise, then $u$ may be taken to be of this form, and the $L^1$TV functional in (\ref{ce}) reduces to:
 
 \begin{align*}
 F_{CE}(\Sigma) &= \text{Per}(\Sigma) + \lambda|\Sigma \Delta \Omega|
@@ -62,9 +63,9 @@ Where $V_1$ is 1-dimensional volume (length), $V_2$ is 2-dimensional volume (are
 \mathbb{F}(\partial \Omega) = F_{CE}(\Sigma)
 \end{equation}
 
-with flat norm decomposition $\{\partial \Omega, \Sigma \Delta \Omega\}$, with $\partial \Omega$ denoting the measure theoretic boundary of $\Omega$. In \cite{shapes}, Kevin Et al. thus represented the problem of computing the flat norm as minimizing the $L^1$TV functional and computing the minimzer by graph cuts as introduced by \cite{kolmogorov}. Applied to images, this is realized by representing each pixel as a node on a rectangular grid which forms the working space. A characteristic function $\chi_\Omega$ is defined on the nodes which represents a black and white thresholded image. Graph edges are added between each node using 16 nearest neighbors in image space. Each of these edges are weighted by minimizing gradient computation error on known functions. After, a virtual sink ($t$) and a virtual source node ($s$) are added. The source node is connected to every node in $\Omega$ and the sink to every node on the grid not in $\Omega$. 
+with flat norm decomposition $\{\partial \Omega, \Sigma \Delta \Omega\}$, with $\partial \Omega$ denoting the measure theoretic boundary of $\Omega$. In \cite{shapes}, Vixie Et al. thus represented the problem of computing the flat norm as minimizing the $L^1$TV functional and computing the minimzer by graph cuts as introduced by \cite{kolmogorov}. Applied to images, this is realized by representing each pixel as a node on a rectangular grid which forms the working space. A characteristic function $\chi_\Omega$ is defined on the nodes which represents a black and white thresholded image. Graph edges are added between each node using 16 nearest neighbors in image space. Each of these edges are weighted by minimizing gradient computation error on known functions. After, a virtual sink ($t$) and a virtual source node ($s$) are added. The source node is connected to every node in $\Omega$ and the sink to every node on the grid not in $\Omega$. 
 
-A particular cut of this graph corresponds has a capacity equal to the value of the flat norm $\mathbb{F}(S)$ for a set of nodes $S$ consisting of nodes $n$ for which either the edge $(n,s)$ or $(n,t)$ is in the cut. Any cut of the graph incurs a penalty proportional to the number of image nodes it cuts, with the penalty exactly equal to $V_1(T-\partial S)$ in (\ref{fn}) for parameter $\lambda$. Hence finding a cut with minimal capacity is the same as computing the flat norm. 
+A particular cut of this graph has a capacity equal to the value of the flat norm $\mathbb{F}(S)$ for a set of nodes $S$ consisting of nodes $n$ for which either the edge $(n,s)$ or $(n,t)$ is in the cut. Any cut of the graph incurs a penalty proportional to the number of image nodes it cuts, with the penalty exactly equal to $V_1(T-\partial S)$ in (\ref{fn}) for parameter $\lambda$. Hence finding a cut with minimal capacity is the same as computing the flat norm. 
 
 The vector of weights $w^*$ calculated in \cite{shapes} were chosen more specifically to approximate the function $g_\theta:\mathbb{R}^2 \to \mathbb{R}$ whose gradient is $\nabla g_\theta = (\cos \theta, \sin \theta)^T$ for all $\theta$:
 
@@ -93,11 +94,11 @@ Equation (\ref{oldmin}) was solved analytically to obtain weights $(w_1,w_2,w_3)
 
 In the present work, we extend the multiscale flat norm computation to arbitrary graphs embedded in $\mathbb{R}^n$ using the framework above, and provide code to calculate explicitly in $\mathbb{R}^2$ and $\mathbb{R}^3$.
 
-Let $V = \{v_1,...,v_N\}$ be a set of vertices in $\mathbb{R}^n$ with a set symmetric edges $E$ on $V$. Fix a particular vertex $v \in V$ with degree $D$ and associated connected $\{u_i, i = 1,...,D\}$. We will provide a scheme for calculating the edge weights $\{w_i, i = 1,...,D\}$ that both recover the weights obtained in (\ref{oldmin}) in the case of a regular unit grid but extend to arbitrary irregular grids and connections. Our weights will be chosen to minimize the distance (in the $L^2$ sense) between the linear approximation of a weighted sum of the edges and the total variation over $\partial B(0,1)$, the unit sphere at the origin:
+Let $V = \{v_1,...,v_N\}$ be a set of vertices in $\mathbb{R}^n$ with a set of symmetric edges $E$ on $V$. Fix a particular vertex $v \in V$ with degree $D$ and associated connections $\{u_i, i = 1,...,D\}$. We will provide a scheme for calculating the edge weights $\{w_i, i = 1,...,D\}$ that recover the weights obtained in (\ref{oldmin}) in the case of a regular unit grid and extend to arbitrary irregular grids and connections. Our weights will be chosen to minimize the distance (in the $L^2$ sense) between the linear approximation of a weighted sum of the edges and the total variation over $\partial B(0,1)$, the unit sphere at the origin:
 
-\begin{align*}
+\begin{align}
 \mathcal{F}(w_1,w_2,...,w_D) := \int_{\partial B(0,1)} \left|\sum_{i=1}^D w_i |\langle \nu, u_i \rangle| - \| \nu \| \right|^2d\nu
-\end{align*}
+\end{align}
 
 Which expands into the quadratic:
 
@@ -113,13 +114,13 @@ C_2^i &:= \int_{\partial B(0,1)} |\langle \nu,u_i \rangle| d\nu\\
 C_3^{ij} &:= \int_{\partial B(0,1)} |\langle \nu,u_i \rangle \langle \nu, u_j \rangle| d\nu
 \end{align*}
 
-The function above is convex, and thus we minimize it by calculating the gradient:
+\textcolor{red}{The function above is convex, and thus we minimize it by calculating the gradient}:
 
 \begin{align*}
 	\frac{\partial \mathcal{F}}{\partial \omega_k}  &= 2 \omega_k C_1^k + 2 \sum_{m=1}^{D}\omega_{m}C_{3}^{km} - 2\omega_kC_3^{kk} - 2 C_2^k\\
 \end{align*}
 
-Which forms a linear system of $D$ equations in $D$ unknowns. WLOG this system may be presumed nonsingular, as if two edges $u_n$ and $u_m$ are linearly dependent, by scaling and symmetry they will receive the same weight and thus one may be safely removed from the calculation. Thus we can simply solve our system for the stationary point:
+Which forms a linear system of $D$ equations in $D$ unknowns. \textcolor{red}{WLOG this system may be presumed nonsingular, as if two edges $u_n$ and $u_m$ are linearly dependent, by scaling and symmetry they will receive the same weight and thus one may be safely removed from the calculation.} Thus we can simply solve our system for the stationary point:
 
 \begin{align*}
 2 \omega_1 C_1^1 + 2 \sum_{m=2}^{D}\omega_{m}C_{3}^{1m}  - 2 C_2^1 &= 0\\
@@ -153,10 +154,52 @@ Thus the problem reduces to calculation of $C_1^i$, $C_2^i$ and $C_3^{ij}$. We p
 \end{tabular}
 \end{figure}
 
+Solving this system produces a weight $w_i$ for each edge $u_i$ for the vertex $v$, in order to approximate the total variation integral in (5) we multiply each weight by the area of its associated Voronoi cell. With the weighted graph we can then apply the Min Cut Max Flow algorithm after connecting vertices to the virtual source and sink as previously described. 
+
 
 \section{Tests}
 
+Being the conveyer of intuition, we provide some examples. First an image is converted into a greyscale representation using the characteristic function previously described 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.25]{circlepic.png}
+	\hspace{2em}
+	\includegraphics[scale=0.35]{circlesgraph2.png}
+	\caption{Representation of a image as a set of points in $\mathbb{R}^2$, blue points are then used as vertices in the graph.}
+\end{figure}
+
+Each pixel in the image is thresholded to produce a greyscale version, the pixels passing the threshold are then converted in to cartesian coordinates which represent the embedding of the graph in $\mathbb{R}^2$. 
+
+In practice the complete graph is created using these nodes and then pruned down to the nearest neighbors, with 24 being used for the results here. Using the previously described algorithm we can then compute the flatnorm for these graphs using the points colored in blue as $\Omega$ and the full image as the background set $\Sigma$. The flat norm with scale provides a bounded curvature approximation to the set $\Omega$ according to the choice of $\lambda$. Our circle example highlights that $\lambda$ large we will be able to reconstruct the set exactly but as $\lambda$ becomes smaller, circles of radius $r$ with curvature $1 / r > \lambda$ will begin to disappear in the reconstruction.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{circleslamb.png}
+	\caption{The flat norm reconstruction of the image, as lambda decreases higher curvature regions are removed.}
+\end{figure}
+
+
+An added benefit of the assignment of the weights to the graph is the ability to then compute the perimeter of $\Omega$. This is achieved by summing up the weights of edges that cross from $\Omega$ into the background image $\Sigma$. We do this in 2D and 3D for the circle and sphere respectively, and get the following approximations.
+
+\begin{figure}[H]
+	\centering
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		&  Grid Size & Perimeter Estimate Relative Error  \\
+		\hline
+		$\mathbb{S}^1$ & 30x30 &  2.6\%  \\
+		\hline
+		$\mathbb{S}^2$ & TBD & TBD    \\
+		\hline
+	\end{tabular}
+\end{figure}
+
 \section{Edge Cases}
+
+A limitation of the current approach is that for sets $\Omega$ sufficiently close to the boundary of the image pathological behavior occurs.
+
+
 
 \bibliographystyle{plain} % We choose the "plain" reference style
 \bibliography{refs} % Entries are in the refs.bib file

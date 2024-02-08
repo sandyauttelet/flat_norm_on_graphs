@@ -7,7 +7,7 @@ import graph as g
 import image_to_graph as im2g
 from new_node import newnode
 
-img_path = '20x20.png'
+img_path = '25x25.png'
 
 # def flatnorm(nodes,A,l):
 #     edges = g.make_complete(nodes)
@@ -39,7 +39,9 @@ def calculate_flat_norm():
     reduced = g.knn_reduced_graph(G, 24)
     opt.get_graph_weights(reduced)
     t1 = perf_counter()
-    reduced = g.min_cut_max_flow(reduced,in_set,30)
+    #TODO there is some bug where the source vertex gets removed twice
+    #     when the parameter is here
+    reduced = g.min_cut_max_flow(reduced,in_set,0.021)
     t2 = perf_counter()
     print(f"Min cut max flow took {t2-t1} seconds to run")
     xs,ys=[],[]
@@ -72,7 +74,10 @@ def flatnorm_circle(r,n):
     x_val = [A[i][0] for i in range(len(A))]
     y_val = [A[i][1] for i in range(len(A))]
     plt.scatter(x_val,y_val)
-    return calculate_perimeter(nodes,A)
+    plt.show()
+    e = g.make_complete(nodes)
+    G = g.euclidean_graph(nodes,e)
+    return calculate_perimeter(G,A)
 
 def flatnorm_grid(n):
     nodes = [(i,j) for i in range(-n,n) for j in range(-n,n)] #grid
@@ -105,6 +110,7 @@ def test_voronoi():
     E = [entry for entry in nodes if np.sqrt((entry[0])**2+(entry[1])**2) <= 1]
     plt.scatter(*split_coords(nodes))
     plt.scatter(*split_coords(E))
+    plt.show()
     print(calculate_perimeter(RG,E))
     
 
@@ -113,6 +119,8 @@ def test_weights(nodes,edges):
     opt.get_graph_weights(G)
     g.euclidean_plot_2d(G)
     print(nx.get_edge_attributes(G,'capacity'))
-    
-#test_weights(nodes,edges)
-test_voronoi()
+
+if __name__ == "__main__":
+    #test_voronoi()
+    calculate_flat_norm()
+    plt.show()
