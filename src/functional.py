@@ -9,6 +9,24 @@ filename = "2d_lookup_tree5k.txt"
 c3_lookup_table = bst.load_tree(filename)
 
 def integrand_2d(x,ui,uj):
+    """
+        Finds 2d integrand for constant integration of C3.
+
+        Parameters
+        ----------
+        x : float
+            DESCRIPTION
+        ui : array of floats
+            specific vector used for integration.
+        uj : array of floats
+            vector which is connected to the specific vector used for integration.
+
+        Returns
+        -------
+        float
+            integrand used for integration of C3.
+
+        """
     """call with cp.integrate(integrand,0,2*np.pi,([ui],[uj]))"""
     nu = np.zeros((len(x),2))[...,np.newaxis]
     nu[:,0] = np.cos(x)
@@ -20,6 +38,20 @@ def c1_2d(u):
     return np.pi*np.linalg.norm(u,axis=1)**2
 
 def c2_2d(u):
+    """
+        Finds constant values for C2 in 2d derived from spherical jacobian.
+
+        Parameters
+        ----------
+        u : list of list of floats
+            list of vectors created from data set.
+
+        Returns
+        -------
+        float
+            constant value for C2 in 2d.
+
+        """
     """u should be a list of vectors [[u1],[u2],...[uD]]"""
     return 4*np.linalg.norm(u,axis=1)
 
@@ -66,6 +98,22 @@ def c3_2d_integral(u,k,m):
     # return result[0]
 
 def construct_weights_system(u):
+    """
+        Creates jacobian matrix for vectors and their solution to be used in minimization of weights.
+
+        Parameters
+        ----------
+        u : list of list of floats
+            list of vectors created from data set.
+
+        Returns
+        -------
+        A : array of array of floats
+            coefficient matrix for linear optimization problem.
+        b : array of floats
+            solution vector for linear optimization problem, a list of all C2 constants for each vector.
+
+        """
     col1 = c1_2d(u)
     b = c2_2d(u)
     D = len(u)
@@ -80,6 +128,20 @@ def construct_weights_system(u):
     return A,b
 
 def solve_weights_system(u):
+    """
+        Solves the linear optimization problem to compute the minimized weights of the graph.
+
+        Parameters
+        ----------
+        u : list of list of floats
+            list of vectors created from data set.
+
+        Returns
+        -------
+        res : list of floats
+            least squares solution to the minimization problem, i.e. the optimal weights of our graph.
+
+        """
     # t0 = time()
     A,b = construct_weights_system(u)
     # t1 = time()

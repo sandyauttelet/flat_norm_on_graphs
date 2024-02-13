@@ -6,6 +6,22 @@ from new_node import newnode
 sys.setrecursionlimit(100000)
     
 def parse_table(filename):
+    """
+        Sifts through table to find correct values for the constant.
+
+        Parameters
+        ----------
+        filename : string
+            name of file used for importing constant values.
+
+        Returns
+        -------
+        angles : list of floats
+            angles between each u-vector.
+        values : list of floats
+            constant values for that specific angular relationship between u-vectors.
+
+        """
     table = np.loadtxt(filename,delimiter=",")
     angles = table[:,0]
     values = table[:,1]
