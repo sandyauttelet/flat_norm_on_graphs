@@ -28,14 +28,14 @@ file = np.loadtxt(filename,delimiter=',')
 
 angles,values = file[:,0],file[:,1]
 
-def get_perimeter(E,adjacency_matrix,points,neighbors = 24):
+def get_perimeter(E,adjacency_matrix,points):
     #measure function
     s = 0.0
     n = len(points)
     for i in range(n):
         for j in range(n):
             if E[i] and not E[j]:
-                s+= adjacency_matrix[i,j]
+                s += adjacency_matrix[i,j]
     return s
 
 def weights(i,j,u,u_lengths):
@@ -130,7 +130,7 @@ def add_source_sink(G,E,lamb):
         else:
             G.add_edge(sink,i,weight=lamb)
 
-def flat_norm(points,E,lamb,neighbors = 24):
+def flat_norm(points,E,lamb=1.0,perim_only=False,neighbors = 24):
     #main function
     n = len(points)
     if neighbors >= len(points):
@@ -144,7 +144,9 @@ def flat_norm(points,E,lamb,neighbors = 24):
     for i,index in enumerate(weight_indices):
         adjacency_matrix[index[0]][index[1]] = scaled_weights[i]
     adjacency_matrix += adjacency_matrix.T
-    P = get_perimeter(E, adjacency_matrix, points, neighbors)
+    P = get_perimeter(E, adjacency_matrix, points)
+    if perim_only:
+        return P
     G = nx.Graph(adjacency_matrix)
     add_source_sink(G,E,lamb)
     cut_value, partition = nx.minimum_cut(G,"source","sink",capacity='weight',flow_func=edmonds_karp)
@@ -158,7 +160,7 @@ def flat_norm(points,E,lamb,neighbors = 24):
 # below this is temporary testing stuff only
 # =============================================================================
 
-flat_norm(points,points_disk,lamb=1e-2,neighbors=8)
+#flat_norm(points,points_disk,lamb=1e-2,neighbors=8)
 
 # print(perf_counter() - t1)
 
@@ -166,13 +168,14 @@ flat_norm(points,points_disk,lamb=1e-2,neighbors=8)
 # validating Kevin's weights
 # =============================================================================
 
-# u = np.array([(-1.0,0.0),(1.0,0.0),(0.0,-1.0),(0.0,1.0)\
-#               ,(-1.0,1.0),(1.0,1.0),(1.0,-1.0),(-1.0,-1.0)\
-#                   ,(-2.0,1.0),(-1.0,2.0),(1.0,2.0),(2.0,1.0)\
-#                       ,(2.0,-1.0),(1.0,-2.0),(-1.0,-2.0),(-2.0,-1.0)])
-    
-# u_lengths = np.linalg.norm(u,axis=1)
+if __name__ == "__main__":
+    u = np.array([(-1.0,0.0),(1.0,0.0),(0.0,-1.0),(0.0,1.0)\
+                  ,(-1.0,1.0),(1.0,1.0),(1.0,-1.0),(-1.0,-1.0)\
+                      ,(-2.0,1.0),(-1.0,2.0),(1.0,2.0),(2.0,1.0)\
+                          ,(2.0,-1.0),(1.0,-2.0),(-1.0,-2.0),(-2.0,-1.0)])
 
-# result = get_weights(u,u_lengths)
-# print("Ours: ", [result[0],result[5],result[9]])
-# print("KRV: ", [0.1221, 0.0476, 0.0454])
+    u_lengths = np.linalg.norm(u,axis=1)
+
+    result = get_weights(u,u_lengths)
+    print("Ours: ", [result[0],result[5],result[9]])
+    print("KRV: ", [0.1221, 0.0476, 0.0454])
