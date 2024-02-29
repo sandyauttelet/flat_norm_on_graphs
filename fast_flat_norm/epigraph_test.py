@@ -51,6 +51,14 @@ if __name__ == "__main__":
     neighbors = 16
     grid_points = 200
     test(*(make_sin_freq(freq)),grid_points=grid_points,neighbors=neighbors)
+    """
+    freq = 1
+    neighbors = 16
+    grid_points = 200
+    arc length numerically: 12.056910087083894
+    flat norm est:  8.44974750791295
+    Rel err:  29.917802763040918
+    """
     #test(f,df,100)
 
 
