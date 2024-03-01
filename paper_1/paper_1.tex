@@ -38,7 +38,7 @@ u^* = \argmin_u F_{CE}(u,f)
 
 Where $u^*: \Omega \rightarrow \Omega$ is the denoised greyscale approximation to the data $f$. The strength of the denoising may be adjusted by the parameter $\lambda \in [0,\infty)$, a large value of $\lambda$ corresponds to enacting a stricter penalty for candidates $u$ that deviate too far from the original data and thus enforce less denoising. We henceforth refer to (\ref{ce}) as the $L^1$TV functional.
 
-It was recognized in \cite{Morgan_2007} by Simon Morgan and Kevin Vixie that the $L^1$TV functional was both a special case of and an extension of the flat norm in geometric measure theory (GMT). The work done in \cite{shapes, hu_median, ibrahim_simplicial} explore the implications of this. These tools have subsequently found applications in chemistry \cite{flat_norm_chemistry_fingers}.
+It was recognized in \cite{Morgan_2007} by Simon Morgan and Kevin Vixie that the $L^1$TV functional was both a special case of and an extension of the flat norm in geometric measure theory (GMT). The work done in \cite{shapes, hu_median, ibrahim_simplicial, fn_decomp} explore the implications of this. These tools have subsequently found applications in chemistry \cite{flat_norm_chemistry_fingers} and engineering \cite{meyur2023structural, aouada2009squigraphs}.
 
 
 \section{Discrete Implementations}
