@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-img_path = 'Circles.png'
+img_path = '20x20.png'
 
 def primitive_threshold(image,black_white_tolerance):
     if image < black_white_tolerance:
@@ -37,7 +37,7 @@ def image_to_graph(img_path,black_white_tolerance=255//2):
     plt.figure(1)
     #plt.scatter(grid_x_indices, grid_y_indices)
     plt.scatter(img_x_indices, img_y_indices)
-    return grid2graph(grid_x_indices,grid_y_indices),list(zip(img_x_indices,img_y_indices))
+    return np.array(grid2graph(grid_x_indices,grid_y_indices)),list(zip(img_x_indices,img_y_indices))
 
 def grid2graph(xs,ys):
     g = []
@@ -67,5 +67,6 @@ def plot_graph_as_image(G):
 if __name__ == "__main__":
     # TODO: there is some bug with non square images
     grid,_ = image_to_graph(img_path)
+    print(grid.shape)
     plt.show()
     #plot_graph_as_image(grid)
