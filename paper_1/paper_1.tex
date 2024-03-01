@@ -201,22 +201,26 @@ Since weights are chosen according to the $F_CE(\Sigma,\Omega)$ functional one i
 	\caption{Estimates from the perimeter term for the volume of spheres.}
 \end{figure}
 
-By creating the a graph that represents the epigraph, this perimeter term gives the arc length of the graph over its domain. We estimate the arclength of $x^2$ and the functions $f_a(x) = \sin(2\pi ax)$ for several choice of $a$. The accuracy of the perimeter estimation becomes poor as frequency becomes higher, indicating a relationship between curvature and the accuracy of the flat norm approximation.
+By creating the a graph that represents the epigraph, this perimeter term gives the arc length of the graph over its domain. We estimate the arclength of $x^2$ and the functions $f_a(x) = \sin(2\pi ax)$ for several choices of $a$. The accuracy of the perimeter estimation becomes poor as frequency becomes higher, indicating a relationship between curvature and the accuracy of the flat norm approximation.
 
 \begin{figure}[H]
 	\centering
 	\begin{tabular}{|c|c|c|c|}
 		\hline
-		&  Grid Size & Arc Length Estimate Relative Error  \\
+		function & Arc Length Estimate Relative Error  \\
 		\hline
-		$x^2$ & 100x100 &  0.22\%  \\
+		$x^2$   &  0.22\%  \\
 		\hline
-		$f_{0.5}(x)$ &  & 8\%    \\
+		$f_{2}(x)$  & 2.42\%    \\
 		\hline
-		$f_{1}(x)$ &  & 30\%    \\
+		$f_{4}(x)$  & 4.62\%    \\
+		\hline
+		$f_{8}(x)$  & 8.45\%    \\
+		\hline
+		$f_{16}(x)$  & 20.41\%    \\
 		\hline
 	\end{tabular}
-	\caption{Estimates of arclength done with 8 nearest neighbors approximation.}
+	\caption{Estimates of arclength with 100x100 grid and 8 NN approximation.}
 \end{figure}
 
 \section{Edge Cases}
