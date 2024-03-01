@@ -46,15 +46,15 @@ def test(f,df,grid_points=30,neighbors=8,perturb=False):
     arclengthint = arc_length(-1,1,df)
     print("arc length numerically:", arclengthint)
     t1 = perf_counter()
-    fn_est,sigma,sigmac = flat_norm(points,E,neighbors=neighbors,lamb=0.0175,perim_only=False)
+    fn_est,sigma,sigmac,perim = flat_norm(points,E,neighbors=neighbors,lamb=0.0175)
+    print("flat norm est: ", perim)
+    print("Rel err: ", np.abs((arclengthint - perim) / arclengthint) * 100.0)
+    print("time to run:", perf_counter() - t1)
     set1 = sigmac & E
     set2 = sigma & ~E
     plt.scatter(points[set1][:,0],points[set1][:,1],color='c',label="Above then below")
     plt.scatter(points[set2][:,0],points[set2][:,1],color='y', label="Below then above")
     plt.legend()
-    print("flat norm est: ", fn_est)
-    print("Rel err: ", np.abs((arclengthint-fn_est)/arclengthint)*100.0)
-    print("time to run:",perf_counter() - t1 )
     plt.show()
 
 if __name__ == "__main__":

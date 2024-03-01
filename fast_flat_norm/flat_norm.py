@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import KDTree
 import networkx as nx
-from networkx.algorithms.flow import dinitz,edmonds_karp
+from networkx.algorithms.flow import edmonds_karp
+import warnings
 
 from time import perf_counter
 
@@ -146,21 +147,22 @@ def flat_norm(points,E,lamb=1.0,perim_only=False,neighbors = 24):
     adjacency_matrix += adjacency_matrix.T
     P = get_perimeter(E, adjacency_matrix, points)
     if perim_only:
-        return P
+        return None,None,None,P
     G = nx.Graph(adjacency_matrix)
     add_source_sink(G,E,lamb)
     cut_value, partition = nx.minimum_cut(G,"source","sink",capacity='weight',flow_func=edmonds_karp)
     keep,_ = partition
-    print(keep)
+    if len(keep) == 1:
+        warnings.warn("No solution returned from min cut, lambda parameter likely too small.")
     keep.remove("source")
     result = points[list(keep)]
     #plt.scatter(result[:,0],result[:,1])
-    sigma = np.zeros(900).astype(bool)
+    sigma = np.zeros(n).astype(bool)
     sigma[list(keep)] = 1
     sigma = sigma.astype(bool)
-    print(sigma.shape)
+    #print(sigma.shape)
     sigmac = ~sigma
-    return result, sigma, sigmac
+    return result, sigma, sigmac, P
 
 # =============================================================================
 # below this is temporary testing stuff only
