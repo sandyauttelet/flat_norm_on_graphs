@@ -151,10 +151,16 @@ def flat_norm(points,E,lamb=1.0,perim_only=False,neighbors = 24):
     add_source_sink(G,E,lamb)
     cut_value, partition = nx.minimum_cut(G,"source","sink",capacity='weight',flow_func=edmonds_karp)
     keep,_ = partition
+    print(keep)
     keep.remove("source")
     result = points[list(keep)]
-    plt.scatter(result[:,0],result[:,1])
-    return result
+    #plt.scatter(result[:,0],result[:,1])
+    sigma = np.zeros(900).astype(bool)
+    sigma[list(keep)] = 1
+    sigma = sigma.astype(bool)
+    print(sigma.shape)
+    sigmac = ~sigma
+    return result, sigma, sigmac
 
 # =============================================================================
 # below this is temporary testing stuff only
