@@ -11,6 +11,7 @@ from functools import wraps
 from time import perf_counter
 import cProfile
 
+
 def timing(f):
     @wraps(f)
     def wrap(*args, **kw):
@@ -26,9 +27,9 @@ def timing(f):
 points_x = np.linspace(-2,2,1000)
 points_y = np.linspace(-2,2,1000)
 
-points = np.dstack(np.meshgrid(points_x,points_y)).reshape((-1,2))
+# points = np.dstack(np.meshgrid(points_x,points_y)).reshape((-1,2))
 
-points_disk = np.linalg.norm(points,axis=1)<=1
+# points_disk = np.linalg.norm(points,axis=1)<=1
 
 # plt.scatter(points[:,0],points[:,1])
 # plt.scatter(points[points_disk][:,0],points[points_disk][:,1])
