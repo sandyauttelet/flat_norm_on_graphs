@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sympy import *
 
-def perturb_points(x, perturbation_bound=0.0, sphere_dist="uniform", length_dist="uniform"):
-    rng = np.random.default_rng(3)
+def perturb_points(x, perturbation_bound=1.0, sphere_dist="uniform", length_dist="uniform"):
+    rng = np.random.default_rng()
     n = len(x[0])
     m = len(x)
     if sphere_dist == "uniform":

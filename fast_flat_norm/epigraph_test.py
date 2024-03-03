@@ -62,7 +62,7 @@ if __name__ == "__main__":
         #plt.figure()
         freq = 1
         neighbors = 8
-        grid_points = 30
+        grid_points = 25
         test(*(make_sin_freq(freq)),grid_points=grid_points,neighbors=neighbors,perturb=True)
     """
     freq = 1
