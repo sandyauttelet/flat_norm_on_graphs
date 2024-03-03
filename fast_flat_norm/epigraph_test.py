@@ -40,20 +40,20 @@ def test(f,df,grid_points=30,neighbors=8,perturb=False):
         points,E = epigraph(f,grid_points,perturb=True)
     else:
         points,E = epigraph(f,grid_points)
-    plt.scatter(points[E][:,0],points[E][:,1],color='b',label="Still Above")
+    plt.scatter(points[E][:,0],points[E][:,1],color='mediumblue',label="$\Sigma \cap E$")
     #plt.plot(points[:,0],f(points[:,1]))
-    plt.scatter(points[~E][:,0],points[~E][:,1],color='g',label="Still Below")
+    plt.scatter(points[~E][:,0],points[~E][:,1],color='dimgray',label="$\Sigma^c \cap E^c$")
     arclengthint = arc_length(-1,1,df)
     print("arc length numerically:", arclengthint)
     t1 = perf_counter()
-    fn_est,sigma,sigmac,perim = flat_norm(points,E,neighbors=neighbors,lamb=0.0175)
+    fn_est,sigma,sigmac,perim = flat_norm(points,E,neighbors=neighbors,lamb=0.005)
     print("flat norm est: ", perim)
     print("Rel err: ", np.abs((arclengthint - perim) / arclengthint) * 100.0)
     print("time to run:", perf_counter() - t1)
     set1 = sigmac & E
     set2 = sigma & ~E
-    plt.scatter(points[set1][:,0],points[set1][:,1],color='c',label="Above then below")
-    plt.scatter(points[set2][:,0],points[set2][:,1],color='y', label="Below then above")
+    plt.scatter(points[set1][:,0],points[set1][:,1],color='indianred',label="$\Sigma^c \cap E$")
+    plt.scatter(points[set2][:,0],points[set2][:,1],color='cornflowerblue', label="$\Sigma \cap E^c$")
     plt.legend()
     plt.show()
 
@@ -61,9 +61,12 @@ if __name__ == "__main__":
     for i in range(1):
         #plt.figure()
         freq = 1
-        neighbors = 8
+        neighbors = 4
         grid_points = 30
+        tick = perf_counter()
         test(*(make_sin_freq(freq)),grid_points=grid_points,neighbors=neighbors,perturb=True)
+        tock = perf_counter()
+        print(tock-tick)
     """
     freq = 1
     neighbors = 16
