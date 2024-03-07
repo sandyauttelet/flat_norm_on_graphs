@@ -27,47 +27,57 @@ In this paper we implement and test a method for computing the multiscale flat n
 In 2005, Chan and Esedoglu introduced an edge preserving total variation regularization functional:
 
 \begin{equation} \label{ce}
-F_{CE}(u) = \int_\Omega |\nabla u| dx + \lambda \int_{\Omega} |u-f|dx
+F_{CE}(u,f) = \int_\Omega |\nabla u| dx + \lambda \int_{\Omega} |u-f|dx
 \end{equation}
 
 Where $\Omega$ is a domain on which we have greyscale data $f:\Omega \to \mathbb{R}$ we would like to denoise. Solving the associated minimization problem above we obtain:
 
 \begin{align*}
-u^* = \argmin_u F_{CE}(u)
+u^* = \argmin_u F_{CE}(u,f)
 \end{align*}
 
-Which is the denoised greyscale approximation $u^*:\Omega \to \mathbb{R}$ to the data $f$. The strength of the denoising may be adjusted by the parameter $\lambda \in [0,\infty)$, a large value of $\lambda$ corresponds to enacting a stricter penalty for candidates $u$ that deviate too far from the original data and thus enforce less denoising. We henceforth refer to (\ref{ce}) as the $L^1$TV functional.
+Where $u^*: \Omega \rightarrow \Omega$ is the denoised greyscale approximation to the data $f$. The strength of the denoising may be adjusted by the parameter $\lambda \in [0,\infty)$, a large value of $\lambda$ corresponds to enacting a stricter penalty for candidates $u$ that deviate too far from the original data and thus enforce less denoising. We henceforth refer to (\ref{ce}) as the $L^1$TV functional.
 
-It was recognized in \cite{Morgan_2007} by Simon Morgan and Kevin Vixie that the $L^1$TV functional was both a special case of and an extension of the flat norm in geometric measure theory (GMT). Work was done in \cite{shapes} by Kevin Vixie Et al. to explore the implications of this.
+It was recognized in \cite{Morgan_2007} by Simon Morgan and Kevin Vixie that the $L^1$TV functional was both a special case of and an extension of the flat norm in geometric measure theory (GMT). The work done in \cite{shapes, hu_median, ibrahim_simplicial, fn_decomp} explore the implications of this. These tools have subsequently found applications in chemistry \cite{flat_norm_chemistry_fingers} and engineering \cite{meyur2023structural, aouada2009squigraphs}.
 
 
 \section{Discrete Implementations}
 
-Let $\chi_E$ is the characteristic function of $E$, with $\chi_E(x) = 1$ if $x \in E$ and $0$ otherwise, then $u$ may be taken to be of this form, and the $L^1$TV functional in (\ref{ce}) reduces to:
+Let $\chi_E$ is the characteristic function of $E$, with $\chi_E(x) = 1$ if $x \in E$ and $0$ otherwise. Then $u$ may be taken to be of this form, and the $L^1$TV functional in (\ref{ce}) reduces to:
 
 \begin{align*}
-F_{CE}(\Sigma) &= \text{Per}(\Sigma) + \lambda|\Sigma \Delta \Omega|
+F_{CE}(\Sigma,\Omega) &= \text{Per}(\Sigma) + \lambda|\Sigma \Delta \Omega|
 \end{align*}
 
-Where $\Sigma$ is the support of $u = \chi_\Sigma$, Per($\Sigma$) is the perimeter of $\Sigma$, and $\Sigma \Delta \Omega$ is the symmetric difference between $\Sigma$ and the support $\Omega$ of the data $f = \chi_\Omega$. 
+where $\Sigma$ is the support of $u = \chi_\Sigma$, Per($\Sigma$) is the perimeter of $\Sigma$, and $\Sigma \Delta \Omega$ is the symmetric difference between $\Sigma$ and the support $\Omega$ of the data $f = \chi_\Omega$ (see \cite{ce} for the details). 
 
 The flat norm with scale $\lambda$ of an oriented $1$-dimensional set $T$ is given by:
 
 \begin{equation} \label{fn}
-\mathbb{F}(T) = \min_S \{V_1(T-\partial S) + \lambda V_2(S)\}
+\mathbb{F}_\lambda(T) = \min_S \{V_1(T-\partial S) + \lambda V_2(S)\}
 \end{equation}
 
-Where $V_1$ is 1-dimensional volume (length), $V_2$ is 2-dimensional volume (area) and $S$ varies over $2$-dimensional regions. We refer to the pair of the 1D and 2D sets $\{T,S\}$ as the flat norm decomposition. By \cite{Morgan_2007} we have for fixed $\lambda$:
+Where $V_1$ is 1-dimensional volume (length), $V_2$ is 2-dimensional volume (area) and $S$ varies over $2$-dimensional regions. We refer to the pair of the 1D and 2D sets $\{T,S^*\}$ as the flat norm decomposition, where $S^*$ is the minimizer of $(\ref{fn})$. In \cite{Morgan_2007} Morgan and Vixie established for $\Omega \subseteq \mathbb{R}^n$,
 
 \begin{equation}
-\mathbb{F}(\partial \Omega) = F_{CE}(\Sigma)
+\mathbb{F}(\partial^* \Omega) = \min_{\Sigma} F_{CE}(\Sigma,\Omega)
 \end{equation}
 
-with flat norm decomposition $\{\partial \Omega, \Sigma \Delta \Omega\}$, with $\partial \Omega$ denoting the measure theoretic boundary of $\Omega$. In \cite{shapes}, Vixie Et al. thus represented the problem of computing the flat norm as minimizing the $L^1$TV functional and computing the minimzer by graph cuts as introduced by \cite{kolmogorov}. Applied to images, this is realized by representing each pixel as a node on a rectangular grid which forms the working space. A characteristic function $\chi_\Omega$ is defined on the nodes which represents a black and white thresholded image. Graph edges are added between each node using 16 nearest neighbors in image space. Each of these edges are weighted by minimizing gradient computation error on known functions. After, a virtual sink ($t$) and a virtual source node ($s$) are added. The source node is connected to every node in $\Omega$ and the sink to every node on the grid not in $\Omega$. 
+Where $\partial^*$ denotes the reduced boundary of $\Omega$ (up to a set of $H^{n-1}$ measure zero $\partial^* \Omega$ is equal to the measure theoretic boundary of $\Omega$.
 
-A particular cut of this graph has a capacity equal to the value of the flat norm $\mathbb{F}(S)$ for a set of nodes $S$ consisting of nodes $n$ for which either the edge $(n,s)$ or $(n,t)$ is in the cut. Any cut of the graph incurs a penalty proportional to the number of image nodes it cuts, with the penalty exactly equal to $V_1(T-\partial S)$ in (\ref{fn}) for parameter $\lambda$. Hence finding a cut with minimal capacity is the same as computing the flat norm. 
+Practically, Vixie and Morgan \cite{shapes} tells us that we can use any method that solves the Chan Esedoglu problem to compute the flatnorm for co-dimension 1 boundaries. Subsequently they used the graph cut method introduced in \cite{kolmogorov}. Additional methods based on simplicial complexes have been developed since that  extend the multiscale flat norm to inputs that are not necessarily boundaries \cite{ibrahim_simplicial}.
 
-The vector of weights $w^*$ calculated in \cite{shapes} were chosen more specifically to approximate the function $g_\theta:\mathbb{R}^2 \to \mathbb{R}$ whose gradient is $\nabla g_\theta = (\cos \theta, \sin \theta)^T$ for all $\theta$:
+Applied to images, this is realized by representing each pixel as a node on a rectangular grid which forms the working space. A characteristic function $\chi_\Omega$ is defined on the nodes which represents a black and white thresholded image. Graph edges are added between each node using the 16 distinct directions in image space. Each of these edges are weighted by minimizing gradient computation error on known linear functions. After, a virtual sink ($t$) and a virtual source node ($s$) are added. The source node is connected to every node in $\Omega$ and the sink to every node on the grid not in $\Omega$. 
+
+With the correct setting of weights a cut of this graph has a capacity equal to $F_{CE}(\Sigma,\Omega)$. For $\Sigma$ treated as the set of nodes in the graph that are either (1) connected to the source by an edge not cut or (2) are connected ot the sink by an edge that is cut, any cut of the graph incurs a penalty equal to $F_{CE}(\Sigma,\Omega)$ Hence finding a cut with minimal capacity is the same as computing a discrete approximation to $F_{CE}(\Sigma,\Omega)$ and hence an approximation to the flat norm as well. 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=1]{graph-cut-for-a-1-dimensional-image.png}
+	\caption{A discrete approximation to $F_{CE}(\Sigma,\Omega)$ using graph cuts from \cite{Morgan_2007}.}
+\end{figure}
+
+The vector of weights $w^*$ calculated in \cite{shapes} were chosen more specifically to approximate the linear function $g_\theta:\mathbb{R}^2 \to \mathbb{R}$ whose gradient is $\nabla g_\theta = (\cos \theta, \sin \theta)^T$ for all $\theta$:
 
 \begin{equation} \label{oldmin}
 w^* = \argmin_w \int_0^{2\pi} (h(w,\theta)-1)^2 d\theta
@@ -94,19 +104,14 @@ Equation (\ref{oldmin}) was solved analytically to obtain weights $(w_1,w_2,w_3)
 
 In the present work, we extend the multiscale flat norm computation to arbitrary graphs embedded in $\mathbb{R}^n$ using the framework above, and provide code to calculate explicitly in $\mathbb{R}^2$ and $\mathbb{R}^3$.
 
-Let $V = \{v_1,...,v_N\}$ be a set of vertices in $\mathbb{R}^n$ with a set of symmetric edges $E$ on $V$. Fix a particular vertex $v \in V$ with degree $D$ and associated connections $\{u_i, i = 1,...,D\}$. We will provide a scheme for calculating the edge weights $\{w_i, i = 1,...,D\}$ that recover the weights obtained in (\ref{oldmin}) in the case of a regular unit grid and extend to arbitrary irregular grids and connections. Our weights will be chosen to minimize the distance (in the $L^2$ sense) between the linear approximation of a weighted sum of the edges and the total variation over $\partial B(0,1)$, the unit sphere at the origin:
+Let $V = \{v_1,...,v_N\}$ be a set of vertices in $\mathbb{R}^n$ with a set of edges $E$ on $V$. Fix a particular vertex $v \in V$ with degree $D$ and associated edges  $\{u_i\}_{i=1}^D$. We provide a scheme for calculating the edge weights $\{w_i\}_{i=1}^D$ that recover the weights obtained in (\ref{oldmin}) in the case of a regular unit grid and extend to arbitrary irregular grids and connections. Our weights will be chosen to minimize the distance (in the $L^2$ sense) between the weighted sum of the edges and the length of the graident vector $\nu$ on $\partial B(0,1)$, the unit sphere at the origin:
 
 \begin{align}
-\mathcal{F}(w_1,w_2,...,w_D) := \int_{\partial B(0,1)} \left|\sum_{i=1}^D w_i |\langle \nu, u_i \rangle| - \| \nu \| \right|^2d\nu
+\mathcal{F}(w_1,w_2,...,w_D) &:= \int_{\partial B(0,1)} \left|\sum_{i=1}^D w_i |\langle \nu, u_i \rangle| - 1 \right|^2d\nu\\
+&= \sum_{i=1}^D w_i^2C_1^i + 2 \sum_{i=1}^D \sum_{j=1}^{i-1} w_i w_j C_3^{ij} - 2 \sum_{i=1}^D w_i C_2^i + \alpha(n)
 \end{align}
 
-Which expands into the quadratic:
-
-\begin{align*}
-\mathcal{F}(w_1,w_2,...,w_D) &= \sum_{i=1}^D w_i^2C_1^i + 2 \sum_{i=1}^D \sum_{j=1}^{i-1} w_i w_j C_3^{ij} - 2 \sum_{i=1}^D w_i C_2^i + \alpha(n)
-\end{align*}
-
-Where $\alpha(n) = \int_{\partial B(0,1)}d\nu$ is the $n$-dimensional measure of the unit $n$ sphere, with:
+Where $\alpha(n) = \int_{\partial B(0,1)}d\nu$ is the measure of $\mathbb{S}^{n-1}$ in $\mathbb{R}^n$. 
 
 \begin{align*}
 C_1^i &:= \int_{\partial B(0,1)} |\langle \nu,u_i \rangle|^2 d\nu\\
@@ -120,7 +125,7 @@ C_3^{ij} &:= \int_{\partial B(0,1)} |\langle \nu,u_i \rangle \langle \nu, u_j \r
 	\frac{\partial \mathcal{F}}{\partial \omega_k}  &= 2 \omega_k C_1^k + 2 \sum_{m=1}^{D}\omega_{m}C_{3}^{km} - 2\omega_kC_3^{kk} - 2 C_2^k\\
 \end{align*}
 
-Which forms a linear system of $D$ equations in $D$ unknowns. \textcolor{red}{WLOG this system may be presumed nonsingular, as if two edges $u_n$ and $u_m$ are linearly dependent, by scaling and symmetry they will receive the same weight and thus one may be safely removed from the calculation.} Thus we can simply solve our system for the stationary point:
+Which forms a linear system of $D$ equations in $D$ unknowns. We then solve the following system for a stationary point:
 
 \begin{align*}
 2 \omega_1 C_1^1 + 2 \sum_{m=2}^{D}\omega_{m}C_{3}^{1m}  - 2 C_2^1 &= 0\\
@@ -128,7 +133,7 @@ Which forms a linear system of $D$ equations in $D$ unknowns. \textcolor{red}{WL
 2 \omega_D C_1^D + 2 \sum_{m=1}^{D-1}\omega_{m}C_{3}^{Dm} - 2 C_2^D &= 0\\
 \end{align*}
 
-If needed, the Hessian may also be quickly calculated:
+In practice this is done using least squares. If needed, the Hessian may also be quickly calculated:
 
 \begin{align*}
 \frac{\partial^2 \mathcal{F}}{\partial \omega_k \partial \omega_\ell} &= \begin{cases}
@@ -171,7 +176,7 @@ Being the conveyer of intuition, we provide some examples. First an image is con
 
 Each pixel in the image is thresholded to produce a greyscale version, the pixels passing the threshold are then converted in to cartesian coordinates which represent the embedding of the graph in $\mathbb{R}^2$. 
 
-In practice the complete graph is created using these nodes and then pruned down to the nearest neighbors, with 24 being used for the results here. Using the previously described algorithm we can then compute the flatnorm for these graphs using the points colored in blue as $\Omega$ and the full image as the background set $\Sigma$. The flat norm with scale provides a bounded curvature approximation to the set $\Omega$ according to the choice of $\lambda$. Our circle example highlights that $\lambda$ large we will be able to reconstruct the set exactly but as $\lambda$ becomes smaller, circles of radius $r$ with curvature $1 / r > \lambda$ will begin to disappear in the reconstruction.
+In practice the complete graph is created using these nodes and then pruned down to the nearest neighbors, with 24 being used for the results here. Using the previously described algorithm we can then compute the flatnorm for these graphs using the points colored in blue as $\Omega$ and the full image as the background set $\Sigma$. The flat norm with scale provides a bounded curvature approximation to the set $\Omega$ according to the choice of $\lambda$. Our circle example highlights that for $\lambda$ large we will be able to reconstruct the set exactly but as $\lambda$ becomes smaller, circles of radius $r$ with $r < \frac{2}{\lambda}$ will begin to disappear in the reconstruction.
 
 \begin{figure}[H]
 	\centering
@@ -180,7 +185,7 @@ In practice the complete graph is created using these nodes and then pruned down
 \end{figure}
 
 
-An added benefit of the assignment of the weights to the graph is the ability to then compute the perimeter of $\Omega$. This is achieved by summing up the weights of edges that cross from $\Omega$ into the background image $\Sigma$. We do this in 2D and 3D for the circle and sphere respectively, and get the following approximations.
+Since weights are chosen according to the $F_CE(\Sigma,\Omega)$ functional one is able to recover the perimeter of $\Sigma$. This is achieved by summing over weights for edges that cross from $\Sigma$ into the background image $\Omega$. We do this in 2D and 3D for the circle and sphere respectively, and get the following approximations.
 
 \begin{figure}[H]
 	\centering
@@ -193,6 +198,29 @@ An added benefit of the assignment of the weights to the graph is the ability to
 		$\mathbb{S}^2$ & TBD & TBD    \\
 		\hline
 	\end{tabular}
+	\caption{Estimates from the perimeter term for the volume of spheres.}
+\end{figure}
+
+By creating the a graph that represents the epigraph, this perimeter term gives the arc length of the graph over its domain. We estimate the arclength of $x^2$ and the functions $f_a(x) = \sin(2\pi ax)$ for several choices of $a$. The accuracy of the perimeter estimation becomes poor as frequency becomes higher, indicating a relationship between curvature and the accuracy of the flat norm approximation.
+
+\begin{figure}[H]
+	\centering
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		function & Arc Length Estimate Relative Error  \\
+		\hline
+		$x^2$   &  0.22\%  \\
+		\hline
+		$f_{2}(x)$  & 2.42\%    \\
+		\hline
+		$f_{4}(x)$  & 4.62\%    \\
+		\hline
+		$f_{8}(x)$  & 8.45\%    \\
+		\hline
+		$f_{16}(x)$  & 20.41\%    \\
+		\hline
+	\end{tabular}
+	\caption{Estimates of arclength with 100x100 grid and 8 NN approximation.}
 \end{figure}
 
 \section{Edge Cases}
