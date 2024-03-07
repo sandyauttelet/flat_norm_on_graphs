@@ -159,31 +159,50 @@ Thus the problem reduces to calculation of $C_1^i$, $C_2^i$ and $C_3^{ij}$. We p
 \end{tabular}
 \end{figure}
 
-Solving this system produces a weight $w_i$ for each edge $u_i$ for the vertex $v$, in order to approximate the total variation integral in (5) we multiply each weight by the area of its associated Voronoi cell. With the weighted graph we can then apply the Min Cut Max Flow algorithm after connecting vertices to the virtual source and sink as previously described. 
+Solving this system produces a weight $w_i$ for each edge $u_i$ for the vertex $v$, in order to approximate the total variation integral in (5) we multiply each weight by the area of its associated Voronoi cell. With the weighted graph we can then apply the Min Cut Max Flow algorithm after connecting vertices to the virtual source and sink as previously described.
+
+The overall runtime complexity of the algorithm is estimated as follows. Let for a graph with $V$ vertices of degree $D$, and $E$ edges, we estimate the run time to be
+\begin{align}
+	O(|V|\log|V| + |V||D|^3 + |V||E|^2)
+\end{align}
+Where the first term comes from constructing a $k$-d, the second from solving the $D \times D$ weight system for each vertex and the final term comes from the choice of min cut max flow algorithm.  
 
 
 \section{Tests}
 
-Being the conveyer of intuition, we provide some examples. First an image is converted into a greyscale representation using the characteristic function previously described 
+\subsection{Visualizations}
+
+Being the conveyer of intuition, we provide some examples. First an image is converted into a greyscale representation using the characteristic function previously described. Each pixel in the image is thresholded to produce a greyscale version, the pixels passing the threshold are then converted in to cartesian coordinates which represent the embedding of the graph in $\mathbb{R}^2$. 
+
+In practice the complete graph is created using these nodes and then pruned down to the nearest neighbors, with 24 being used for the results here. Using the previously described algorithm we can then compute the flatnorm for these graphs using the points colored in blue as $\Omega$ and the full image as the background set $\Sigma$. The flat norm with scale provides a bounded curvature approximation to the set $\Omega$ according to the choice of $\lambda$. Figure 3 highlights that for $\lambda$ large we will be able to reconstruct the set exactly but as $\lambda$ becomes smaller, circles of radius $r$ with $r < \frac{2}{\lambda}$ will begin to disappear in the reconstruction.
+
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.25]{circlepic.png}
-	\hspace{2em}
-	\includegraphics[scale=0.35]{circlesgraph2.png}
-	\caption{Representation of a image as a set of points in $\mathbb{R}^2$, blue points are then used as vertices in the graph.}
-\end{figure}
-
-Each pixel in the image is thresholded to produce a greyscale version, the pixels passing the threshold are then converted in to cartesian coordinates which represent the embedding of the graph in $\mathbb{R}^2$. 
-
-In practice the complete graph is created using these nodes and then pruned down to the nearest neighbors, with 24 being used for the results here. Using the previously described algorithm we can then compute the flatnorm for these graphs using the points colored in blue as $\Omega$ and the full image as the background set $\Sigma$. The flat norm with scale provides a bounded curvature approximation to the set $\Omega$ according to the choice of $\lambda$. Our circle example highlights that for $\lambda$ large we will be able to reconstruct the set exactly but as $\lambda$ becomes smaller, circles of radius $r$ with $r < \frac{2}{\lambda}$ will begin to disappear in the reconstruction.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[scale=0.5]{circleslamb.png}
+	\includegraphics[scale=0.4]{figures/circlesgraph.png}
+	\includegraphics[scale=0.4]{figures/circlesdisappear.png}
 	\caption{The flat norm reconstruction of the image, as lambda decreases higher curvature regions are removed.}
 \end{figure}
 
+
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.6]{figures/epigraph.png}
+	\caption{The epigraph of a $\sin$ curve with the background grid in gray.}
+\end{figure}
+
+More insight can be gained by breaking down the sets in play for a particular image in further detail. Here we consider a set $E$ given by the epigraph of $f(x) = \sin(16\pi x)$. Let $\Sigma$ be the minimizer produced by approximating $E$ with the background grid labeled in grey for some $\lambda$. Fig 5 shows that regions of high curvature $\Sigma^C \cap E$ are removed from the solution and regions in the background grid but not in $E$ i.e. $\Sigma \cap E^C$ are also introduced to fill in regions of high curvature. The overall minimizer is then built out of both of these regions i.e. $\Sigma = (\Sigma \cap E) \cup (\Sigma \cap E^c)$.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.6]{figures/minimizer_detail.png}
+	\caption{The flat norm reconstruction of the $\sin$ curve, regions of high curvature are removed or filled in.}
+\end{figure}
+
+
+\subsection{Perimeter Calculation}
 
 Since weights are chosen according to the $F_CE(\Sigma,\Omega)$ functional one is able to recover the perimeter of $\Sigma$. This is achieved by summing over weights for edges that cross from $\Sigma$ into the background image $\Omega$. We do this in 2D and 3D for the circle and sphere respectively, and get the following approximations.
 
