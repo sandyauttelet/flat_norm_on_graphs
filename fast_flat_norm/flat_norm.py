@@ -10,6 +10,8 @@ from scipy.sparse import csr_array
 from functools import wraps
 from time import perf_counter
 import cProfile
+from numba import jit, int32, float64
+import math
 
 
 def timing(f):
@@ -46,6 +48,21 @@ file = np.loadtxt(filename,delimiter=',')
 
 angles,values = file[:,0],file[:,1]
 
+@jit(nopython=True)
+def bs(angles,theta):
+    left,right = 0, len(angles)-1
+    eps = 10e-8
+    while (left <= right):
+        mid = (left+ right)//2
+
+        if abs(angles[mid] - theta) < eps:
+            return mid
+        elif angles[mid] < theta:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return right+1
+
 @timing
 def get_perimeter(E,G):
     #measure function
@@ -59,21 +76,23 @@ def get_perimeter(E,G):
                     s += G[p1][p2]["weight"]
     return s
 
-def weights(i,j,u,u_lengths):
+@jit(nopython=True)
+def weights_numba(i,j,u,u_lengths,values):
     #weight_function
     length = u_lengths[i]*u_lengths[j]
     if i == j:
-        return np.pi*length
+        return math.pi*length
     # try to jiggle into -1,1
-    eps = np.finfo(np.float32).eps
-    inner = np.inner(u[i],u[j])/(length+eps)
-    theta = np.arccos(inner)
-    idx = np.searchsorted(angles,theta)
+    eps = 10e-6
+    inner = sum([u[i][k]*u[j][k] for k in range(len(u[i]))])
+    inner = inner/(length+eps)
+    theta = math.acos(inner)
+    idx = bs(angles,theta)#np.searchsorted(angles,theta)
     # idx.clip(0,len(values)-1)
     result = length*values[idx]
     return result
 
-weights_vectorized = np.vectorize(weights,excluded=['u','u_lengths'])
+weights_numba = np.vectorize(weights_numba,excluded=['u','u_lengths','values'])
 #weight_function
 
 solve_vectorized = np.vectorize(np.linalg.lstsq,excluded=['rcond'],signature='(m,m),(m)->(m),(k),(),(m)')
@@ -87,7 +106,7 @@ def make_A(edges,lengths):
     #weight_function
     n = len(edges)
     i,j = np.indices((n,n))
-    A = weights_vectorized(i,j,u=edges,u_lengths=lengths)
+    A = weights_numba(i,j,u=edges,u_lengths=lengths,values=values)
     return A
 
 A_vectorized = np.vectorize(make_A, signature='(m,n),(m)->(m,m)')
@@ -158,7 +177,7 @@ def add_source_sink(G,E,lamb):
 
 @timing
 def get_min_cut(G):
-    return nx.minimum_cut(G,"source","sink",capacity='weight',flow_func=edmonds_karp)
+    return nx.minimum_cut(G,"source","sink",capacity='weight')
 
 def flat_norm(points,E,lamb=1.0,perim_only=False,neighbors = 24):
     #main function
@@ -248,6 +267,13 @@ if __name__ == "__main__":
     # print(tock-tick)
     import pstats
     from pstats import SortKey
-    cProfile.run('flat_norm(points, points_disk, lamb=1, neighbors=8)',"flatnorm")
-    p = pstats.Stats("flatnorm")
-    p.strip_dirs().sort_stats(SortKey.CUMULATIVE).print_stats(50)
+
+    points_x = np.linspace(-2, 2, 2300)
+    points_y = np.linspace(-2, 2, 2300)
+    points = np.dstack(np.meshgrid(points_x,points_y)).reshape((-1,2))
+
+    points_disk = np.linalg.norm(points,axis=1)<=1
+    flat_norm(points, points_disk, lamb=.001, neighbors=8)
+    #cProfile.run('flat_norm(points, points_disk, lamb=.001, neighbors=8)',"flatnorm")
+    #p = pstats.Stats("flatnorm")
+    #p.strip_dirs().sort_stats(SortKey.CUMULATIVE).print_stats(50)
