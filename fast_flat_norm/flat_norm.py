@@ -10,9 +10,11 @@ from scipy.sparse import csr_array
 from functools import wraps
 from time import perf_counter
 import cProfile
-from numba import jit, int32, float64
+from numba import jit, int32, float64, types
 import math
 
+#number of physical cores
+workers = 4
 
 def timing(f):
     @wraps(f)
@@ -95,8 +97,22 @@ def weights_numba(i,j,u,u_lengths,values):
 weights_numba = np.vectorize(weights_numba,excluded=['u','u_lengths','values'])
 #weight_function
 
-solve_vectorized = np.vectorize(np.linalg.lstsq,excluded=['rcond'],signature='(m,m),(m)->(m),(k),(),(m)')
+#solve_vectorized = np.vectorize(np.linalg.lstsq,excluded=['rcond'],signature='(m,m),(m)->(m),(k),(),(m)')
 #weight_function
+
+@jit(types.Array(float64,1,"C")(types.Array(float64,2,"C"),types.Array(float64,1,"C")),nopython=True)
+def fast_lst_sqs(A,b):
+    return np.linalg.lstsq(A,b)[0]
+
+@timing
+@jit(types.Array(float64,2,"C")(types.Array(float64,3,"C"),types.Array(float64,2,"C")),nopython=True)
+def A_solver(A_vec,b_vec):
+    n = len(A_vec)
+    m = len(A_vec[0])
+    soln_vec = np.zeros((n,m))
+    for i in range(n):
+        soln_vec[i] = fast_lst_sqs(A_vec[i],b_vec[i])
+    return soln_vec
 
 def make_b(lengths):
     #weight_function
@@ -117,7 +133,8 @@ def get_weights(edges,lengths):
     #weight_function
     A = A_vectorized(edges,lengths)
     b = make_b(lengths)
-    weights = solve_vectorized(A,b,rcond=None)[0]
+    #weights = solve_vectorized(A,b,rcond=None)[0]
+    weights = A_solver(A,b)
     return weights
 
 def get_sample(x_range,y_range,N):
@@ -139,7 +156,7 @@ def voronoi_areas(points,Tree,N=1000000):
     #voronoi function
     x_range, y_range, total_area = get_bounding_box(points)
     sample_points = get_sample(x_range, y_range, N)
-    nearest_neighbors = Tree.query(sample_points)[1]
+    nearest_neighbors = Tree.query(sample_points,workers=workers)[1]
     indices = np.zeros(len(points))
     unique,counts = np.unique(nearest_neighbors,return_counts=True)
     indices[unique] = counts
@@ -150,7 +167,7 @@ def voronoi_areas(points,Tree,N=1000000):
 def calculate_tree_graph(points,neighbors=24):
     #main function
     Tree = KDTree(points)
-    graph = np.array(Tree.query(points,neighbors+1))
+    graph = np.array(Tree.query(points,neighbors+1,workers=workers))
     neighbor_indices = graph[1,:,1:]
     n = len(points)
     i,j = np.indices((n,neighbors))
@@ -268,12 +285,12 @@ if __name__ == "__main__":
     import pstats
     from pstats import SortKey
 
-    points_x = np.linspace(-2, 2, 2300)
-    points_y = np.linspace(-2, 2, 2300)
+    points_x = np.linspace(-2, 2, 1000)
+    points_y = np.linspace(-2, 2, 1000)
     points = np.dstack(np.meshgrid(points_x,points_y)).reshape((-1,2))
 
     points_disk = np.linalg.norm(points,axis=1)<=1
-    flat_norm(points, points_disk, lamb=.001, neighbors=8)
+    flat_norm(points, points_disk, lamb=1.0, neighbors=8)
     #cProfile.run('flat_norm(points, points_disk, lamb=.001, neighbors=8)',"flatnorm")
     #p = pstats.Stats("flatnorm")
-    #p.strip_dirs().sort_stats(SortKey.CUMULATIVE).print_stats(50)
+    #p.strip_dirs().sort_stats(SortKey.TIME).print_stats(50)

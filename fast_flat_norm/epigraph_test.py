@@ -62,7 +62,7 @@ if __name__ == "__main__":
         #plt.figure()
         freq = 1
         neighbors = 8
-        grid_points = 50
+        grid_points = 500
         tick = perf_counter()
         test(*(make_sin_freq(freq)),grid_points=grid_points,neighbors=neighbors,perturb=True)
         tock = perf_counter()
