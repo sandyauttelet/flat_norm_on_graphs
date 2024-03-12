@@ -207,6 +207,8 @@ def flat_norm(points,E,lamb=1.0,perim_only=False,neighbors = 24):
     areas = voronoi_areas(points,Tree)
     weights = get_weights(edges, lengths)
     scaled_weights = np.multiply(weights,areas[:,np.newaxis]).flatten()
+    print("smallest weight is:", np.min(scaled_weights))
+    print("largest weight is:", np.max(scaled_weights))
     weightst1 = perf_counter()
 
 
@@ -285,8 +287,8 @@ if __name__ == "__main__":
     import pstats
     from pstats import SortKey
 
-    points_x = np.linspace(-2, 2, 1000)
-    points_y = np.linspace(-2, 2, 1000)
+    points_x = np.linspace(-2, 2, 100)
+    points_y = np.linspace(-2, 2, 100)
     points = np.dstack(np.meshgrid(points_x,points_y)).reshape((-1,2))
 
     points_disk = np.linalg.norm(points,axis=1)<=1

@@ -30,26 +30,28 @@ In 2005, Chan and Esedoglu introduced an edge preserving total variation regular
 F_{CE}(u,f) = \int_\Omega |\nabla u| dx + \lambda \int_{\Omega} |u-f|dx
 \end{equation}
 
-Where $\Omega$ is a domain on which we have greyscale data $f:\Omega \to \mathbb{R}$ we would like to denoise. Solving the associated minimization problem above we obtain:
+\noindent  Where $\Omega$ is a domain on which we have greyscale data $f:\Omega \to \mathbb{R}$ we would like to denoise. Solving the associated minimization problem above we obtain:
 
 \begin{align*}
 u^* = \argmin_u F_{CE}(u,f)
 \end{align*}
 
-Where $u^*: \Omega \rightarrow \Omega$ is the denoised greyscale approximation to the data $f$. The strength of the denoising may be adjusted by the parameter $\lambda \in [0,\infty)$, a large value of $\lambda$ corresponds to enacting a stricter penalty for candidates $u$ that deviate too far from the original data and thus enforce less denoising. We henceforth refer to (\ref{ce}) as the $L^1$TV functional.
+ \noindent Where $u^*: \Omega \rightarrow \Omega$ is the denoised greyscale approximation to the data $f$.
+ 
+The strength of the denoising may be adjusted by the parameter $\lambda \in [0,\infty)$, a large value of $\lambda$ corresponds to enacting a stricter penalty for candidates $u$ that deviate too far from the original data and thus enforce less denoising. We henceforth refer to (\ref{ce}) as the $L^1$TV functional.
 
 It was recognized in \cite{Morgan_2007} by Simon Morgan and Kevin Vixie that the $L^1$TV functional was both a special case of and an extension of the flat norm in geometric measure theory (GMT). The work done in \cite{shapes, hu_median, ibrahim_simplicial, fn_decomp} explore the implications of this. These tools have subsequently found applications in chemistry \cite{flat_norm_chemistry_fingers} and engineering \cite{meyur2023structural, aouada2009squigraphs}.
 
 
 \section{Discrete Implementations}
 
-Let $\chi_E$ is the characteristic function of $E$, with $\chi_E(x) = 1$ if $x \in E$ and $0$ otherwise. Then $u$ may be taken to be of this form, and the $L^1$TV functional in (\ref{ce}) reduces to:
+Let $\chi_E$ be the characteristic function of $E$, with $\chi_E(x) = 1$ if $x \in E$ and $0$ otherwise. Then $u$ may be taken to be of this form, and the $L^1$TV functional in (\ref{ce}) reduces to:
 
 \begin{align*}
 F_{CE}(\Sigma,\Omega) &= \text{Per}(\Sigma) + \lambda|\Sigma \Delta \Omega|
 \end{align*}
 
-where $\Sigma$ is the support of $u = \chi_\Sigma$, Per($\Sigma$) is the perimeter of $\Sigma$, and $\Sigma \Delta \Omega$ is the symmetric difference between $\Sigma$ and the support $\Omega$ of the data $f = \chi_\Omega$ (see \cite{ce} for the details). 
+ \noindent where $\Sigma$ is the support of $u = \chi_\Sigma$, Per($\Sigma$) is the perimeter of $\Sigma$, and $\Sigma \Delta \Omega$ is the symmetric difference between $\Sigma$ and the support $\Omega$ of the data $f = \chi_\Omega$ (see \cite{ce} for the details). 
 
 The flat norm with scale $\lambda$ of an oriented $1$-dimensional set $T$ is given by:
 
@@ -57,15 +59,15 @@ The flat norm with scale $\lambda$ of an oriented $1$-dimensional set $T$ is giv
 \mathbb{F}_\lambda(T) = \min_S \{V_1(T-\partial S) + \lambda V_2(S)\}
 \end{equation}
 
-Where $V_1$ is 1-dimensional volume (length), $V_2$ is 2-dimensional volume (area) and $S$ varies over $2$-dimensional regions. We refer to the pair of the 1D and 2D sets $\{T,S^*\}$ as the flat norm decomposition, where $S^*$ is the minimizer of $(\ref{fn})$. In \cite{Morgan_2007} Morgan and Vixie established for $\Omega \subseteq \mathbb{R}^n$,
+ \noindent  Where $V_1$ is 1-dimensional volume (length), $V_2$ is 2-dimensional volume (area) and $S$ varies over oriented $2$-dimensional regions. We refer to the pair of the 1D and 2D sets $\{T,S^*\}$ as the flat norm decomposition, where $S^*$ is the minimizer of $(\ref{fn})$. In \cite{Morgan_2007} Morgan and Vixie established for $\Omega \subseteq \mathbb{R}^n$,
 
 \begin{equation}
-\mathbb{F}(\partial^* \Omega) = \min_{\Sigma} F_{CE}(\Sigma,\Omega)
+\mathbb{F}_\lambda(\partial^* \Omega) = \min_{\Sigma} F_{CE}(\Sigma,\Omega)
 \end{equation}
 
-Where $\partial^*$ denotes the reduced boundary of $\Omega$ (up to a set of $H^{n-1}$ measure zero $\partial^* \Omega$ is equal to the measure theoretic boundary of $\Omega$.
+ \noindent Where $\partial^*$ denotes the reduced boundary of $\Omega$ (up to a set of $H^{n-1}$ measure zero $\partial^* \Omega$ is equal to the measure theoretic boundary of $\Omega$.)
 
-Practically, Vixie and Morgan \cite{shapes} tells us that we can use any method that solves the Chan Esedoglu problem to compute the flatnorm for co-dimension 1 boundaries. Subsequently they used the graph cut method introduced in \cite{kolmogorov}. Additional methods based on simplicial complexes have been developed since that  extend the multiscale flat norm to inputs that are not necessarily boundaries \cite{ibrahim_simplicial}.
+Practically, Vixie and Morgan \cite{shapes} tells us that we can use any method that solves the Chan-Esedoglu problem to compute the flatnorm for co-dimension 1 boundaries. Subsequently they used the graph cut method introduced in \cite{kolmogorov}. Additional methods based on simplicial complexes have been developed since that  extend the multiscale flat norm to inputs that are not necessarily boundaries \cite{ibrahim_simplicial}.
 
 Applied to images, this is realized by representing each pixel as a node on a rectangular grid which forms the working space. A characteristic function $\chi_\Omega$ is defined on the nodes which represents a black and white thresholded image. Graph edges are added between each node using the 16 distinct directions in image space. Each of these edges are weighted by minimizing gradient computation error on known linear functions. After, a virtual sink ($t$) and a virtual source node ($s$) are added. The source node is connected to every node in $\Omega$ and the sink to every node on the grid not in $\Omega$. 
 
@@ -119,13 +121,13 @@ C_2^i &:= \int_{\partial B(0,1)} |\langle \nu,u_i \rangle| d\nu\\
 C_3^{ij} &:= \int_{\partial B(0,1)} |\langle \nu,u_i \rangle \langle \nu, u_j \rangle| d\nu
 \end{align*}
 
-\textcolor{red}{The function above is convex, and thus we minimize it by calculating the gradient}:
+The weights are found via the gradient:
 
 \begin{align*}
 	\frac{\partial \mathcal{F}}{\partial \omega_k}  &= 2 \omega_k C_1^k + 2 \sum_{m=1}^{D}\omega_{m}C_{3}^{km} - 2\omega_kC_3^{kk} - 2 C_2^k\\
 \end{align*}
 
-Which forms a linear system of $D$ equations in $D$ unknowns. We then solve the following system for a stationary point:
+Which yields a linear system of $D$ equations in $D$ unknowns. We then solve the following system for a stationary point:
 
 \begin{align*}
 2 \omega_1 C_1^1 + 2 \sum_{m=2}^{D}\omega_{m}C_{3}^{1m}  - 2 C_2^1 &= 0\\
@@ -133,7 +135,7 @@ Which forms a linear system of $D$ equations in $D$ unknowns. We then solve the 
 2 \omega_D C_1^D + 2 \sum_{m=1}^{D-1}\omega_{m}C_{3}^{Dm} - 2 C_2^D &= 0\\
 \end{align*}
 
-In practice this is done using least squares. If needed, the Hessian may also be quickly calculated:
+In practice this is done using least squares. The Hessian of $\mathcal{F}$ is:
 
 \begin{align*}
 \frac{\partial^2 \mathcal{F}}{\partial \omega_k \partial \omega_\ell} &= \begin{cases}
@@ -141,6 +143,8 @@ In practice this is done using least squares. If needed, the Hessian may also be
 2C_3^{k\ell} & \text{ otherwise}
 \end{cases}
 \end{align*}
+
+And by inspection we see that $\mathcal{F}$ is convex, thus any stationary point yields a global minima. 
 
 Thus the problem reduces to calculation of $C_1^i$, $C_2^i$ and $C_3^{ij}$. We provide the following table of values:
 
@@ -159,22 +163,26 @@ Thus the problem reduces to calculation of $C_1^i$, $C_2^i$ and $C_3^{ij}$. We p
 \end{tabular}
 \end{figure}
 
-Solving this system produces a weight $w_i$ for each edge $u_i$ for the vertex $v$, in order to approximate the total variation integral in (5) we multiply each weight by the area of its associated Voronoi cell. With the weighted graph we can then apply the Min Cut Max Flow algorithm after connecting vertices to the virtual source and sink as previously described.
+Solving this system produces a weight $w_i$ for each edge $u_i$ for the vertex $v$, in order to approximate the total variation integral in (5) we multiply each weight by the area of its associated Voronoi cell. With the weighted graph we can then apply the min-cut max-flow algorithm after connecting vertices to the virtual source and sink as previously described.
 
-The overall runtime complexity of the algorithm is estimated as follows. Let for a graph with $V$ vertices of degree $D$, and $E$ edges, we estimate the run time to be
+The overall runtime complexity of the algorithm is estimated as follows. For a graph with $V$ vertices of degree $D$, and $E$ edges, we estimate the run time to be
 \begin{align}
-	O(|V|\log|V| + |V||D|^3 + |V||E|^2)
+	O(|V|\log|V| + |V||D|^3 + |V|^2|E|)
 \end{align}
-Where the first term comes from constructing a $k$-d, the second from solving the $D \times D$ weight system for each vertex and the final term comes from the choice of min cut max flow algorithm.  
+Where the first term comes from constructing a $k$-d tree, the second from solving the $D \times D$ weight system for each vertex and the final term comes from the choice of min cut max flow algorithm.  
 
 
 \section{Tests}
 
-\subsection{Visualizations}
+\subsection{Implementation and Visualizations}
 
-Being the conveyer of intuition, we provide some examples. First an image is converted into a greyscale representation using the characteristic function previously described. Each pixel in the image is thresholded to produce a greyscale version, the pixels passing the threshold are then converted in to cartesian coordinates which represent the embedding of the graph in $\mathbb{R}^2$. 
+The flat norm decomposition may be calculated on a greyscale image by first choosing a threshold value, pixels with a darkness above the threshold are treated as pure black with a value of ``1", forming the set $\Omega$ and those below the threshold are treated as pure white and are assigned a ``0" thus not belonging to $\Omega$. Thus the image is converted to a characteristic function $\chi_\Omega$.
 
-In practice the complete graph is created using these nodes and then pruned down to the nearest neighbors, with 24 being used for the results here. Using the previously described algorithm we can then compute the flatnorm for these graphs using the points colored in blue as $\Omega$ and the full image as the background set $\Sigma$. The flat norm with scale provides a bounded curvature approximation to the set $\Omega$ according to the choice of $\lambda$. Figure 3 highlights that for $\lambda$ large we will be able to reconstruct the set exactly but as $\lambda$ becomes smaller, circles of radius $r$ with $r < \frac{2}{\lambda}$ will begin to disappear in the reconstruction.
+All coordinates are then put into a KD-Tree structure and connections are formed between the $k$ nearest Euclidean neighbors, forming an initial graph. In our experiments, $k = 8$ neighbors provide the best balance of accuracy and speed. We then assign weights to these edges by solving the minimization problem at each node. Virtual sinks and sources are added with weight $\lambda$ and then a preflow-push algorithm computes the minimum cut yielding $\Sigma^* = \min\limits_\Sigma F_{CE}(\Sigma,\Omega)$.
+
+$\Sigma^*$ is a approximation to $\Omega$ with curvature bounded by $\lambda$. Thus if $\lambda$ is larger than the maximum curvature of $\Omega$, $\Sigma^* = \Omega$ and the original image is returned. For $\lambda$ smaller than this, high curvature features are excluded, yielding a increasingly ``smoothed" result, wherein the limit $\lambda \to 0$ the empty set is returned.
+
+Figure 3 highlights that for $\lambda$ large we will be able to reconstruct the set exactly but as $\lambda$ becomes smaller, circles of radius $r$ with $r < \frac{2}{\lambda}$ will begin to disappear in the reconstruction.
 
 
 \begin{figure}[H]
@@ -220,7 +228,7 @@ Since weights are chosen according to the $F_CE(\Sigma,\Omega)$ functional one i
 	\caption{Estimates from the perimeter term for the volume of spheres.}
 \end{figure}
 
-By creating the a graph that represents the epigraph, this perimeter term gives the arc length of the graph over its domain. We estimate the arclength of $x^2$ and the functions $f_a(x) = \sin(2\pi ax)$ for several choices of $a$. The accuracy of the perimeter estimation becomes poor as frequency becomes higher, indicating a relationship between curvature and the accuracy of the flat norm approximation.
+For the graph defining the epigraph, this perimeter term gives the arc length of the graph over its domain. We estimate the arclength of $x^2$ and the functions $f_a(x) = \sin(2\pi ax)$ for several choices of $a$. The accuracy of the perimeter estimation becomes poor as frequency becomes higher, indicating a relationship between curvature and the accuracy of the flat norm approximation.
 
 \begin{figure}[H]
 	\centering
