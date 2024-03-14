@@ -44,7 +44,7 @@ points_y = np.linspace(-2,2,1000)
 # above this is temporary testing stuff only
 # =============================================================================
 
-filename = '2d_lookup_table5000.txt'
+filename = '2d_lookup_table100000.txt'
 
 file = np.loadtxt(filename,delimiter=',')
 
@@ -53,7 +53,7 @@ angles,values = file[:,0],file[:,1]
 @jit(nopython=True)
 def bs(angles,theta):
     left,right = 0, len(angles)-1
-    eps = 10e-8
+    eps = 1e-8
     while (left <= right):
         mid = (left+ right)//2
 
@@ -213,7 +213,9 @@ def flat_norm(points,E,lamb=1.0,perim_only=False,neighbors = 24):
     edges,lengths,vertices = calculate_edge_vectors(points,graph)
     areas = voronoi_areas(points,Tree)
     weights = get_weights(edges, lengths)
+    print(weights[0])
     scaled_weights = np.multiply(weights,areas[:,np.newaxis]).flatten()
+    print(scaled_weights[0])
     print("smallest weight is:", np.min(scaled_weights))
     print("largest weight is:", np.max(scaled_weights))
     weightst1 = perf_counter()
@@ -280,7 +282,7 @@ if __name__ == "__main__":
     #               ,(-1.0,1.0),(1.0,1.0),(1.0,-1.0),(-1.0,-1.0)\
     #                   ,(-2.0,1.0),(-1.0,2.0),(1.0,2.0),(2.0,1.0)\
     #                       ,(2.0,-1.0),(1.0,-2.0),(-1.0,-2.0),(-2.0,-1.0)])
-    points = np.array([(0.0,0.0),(-1.0,0.0),(0.0,-1.0)\
+    points = np.array([(0.0,0.0),(-1.0,0.0),(0.0, -1.0)\
                   ,(-1.0,1.0),(1.0,1.0)\
                       ,(-2.0,1.0),(-1.0,2.0),(1.0,2.0),(2.0,1.0)\
                           ])

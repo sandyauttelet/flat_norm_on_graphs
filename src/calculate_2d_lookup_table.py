@@ -5,15 +5,17 @@ from time import time
 from scipy.integrate import quad
 
 a = 0
-b = 2*np.pi
-n = 10**5
+b = np.pi
+n = 5000
 
 def integral(theta_uw):
     def integrand(theta,theta_uw):
         return np.abs(np.cos(theta)*np.cos(theta_uw-theta))
-    result = quad(integrand, a, b, args= theta_uw,epsabs=1e-16,epsrel=1e-16,limit=500)
+    result = quad(integrand, 0, 2*np.pi, args= theta_uw,epsabs=1e-16,epsrel=1e-16,limit=500)
     #print("Error estimate:", result[1])
     return result[0]
+
+print(integral(3*np.pi/4),integral(np.pi/4))
 
 # def test_integral():
 #     theta_uw = np.pi/2

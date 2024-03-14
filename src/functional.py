@@ -8,8 +8,11 @@ import pickle
 # filename = "2d_lookup_tree5k.txt"
 # c3_lookup_table = bst.load_tree(filename)
 
-filename = '2d_lookup_table100000.txt'
-#filename = '2d_lookup_table5000.txt'
+#filename = '2d_lookup_table100000.txt'
+#filename = '2d_lookup_table10000.txt'
+filename = '2d_lookup_table5000.txt'
+#filename = 'new_scheme_2d_lookup_table5000.txt'
+#filename = '2d_lookup_table2500.txt'
 
 file = np.loadtxt(filename,delimiter=',')
 
@@ -130,14 +133,14 @@ def test_vector_mag():
 #test_vector_mag()
 
 def compare_with_paper():
-    u = np.array([(-1.0,0.0),(1.0,0.0),(0.0,-1.0),(0.0,1.0)\
-                  ,(-1.0,1.0),(1.0,1.0),(1.0,-1.0),(-1.0,-1.0)\
-                      ,(-2.0,1.0),(-1.0,2.0),(1.0,2.0),(2.0,1.0)\
-                          ,(2.0,-1.0),(1.0,-2.0),(-1.0,-2.0),(-2.0,-1.0)])
-    # u = np.array([(-1.0,0.0),(0.0,-1.0)\
-    #               ,(-1.0,1.0),(1.0,1.0)\
+    # u = np.array([(-1.0,0.0),(1.0,0.0),(0.0,-1.0),(0.0,1.0)\
+    #               ,(-1.0,1.0),(1.0,1.0),(1.0,-1.0),(-1.0,-1.0)\
     #                   ,(-2.0,1.0),(-1.0,2.0),(1.0,2.0),(2.0,1.0)\
-    #                       ])
+    #                       ,(2.0,-1.0),(1.0,-2.0),(-1.0,-2.0),(-2.0,-1.0)])
+    u = np.array([(-1.0,0.0),(0.0,1.0)\
+                  ,(-1.0,1.0),(1.0,1.0)\
+                      ,(-2.0,1.0),(-1.0,2.0),(1.0,2.0),(2.0,1.0)\
+                          ])
     #u = np.array([(-1.0,0.0),(1.0,0.0),(0.0,-1.0),(0.0,1.0),(-1.0,1.0),(1.0,1.0),(1.0,-1.0),(-1.0,-1.0)])
     result = solve_weights_system(u)
     #print("Ours: ", [result[0],result[5],result[9]])
