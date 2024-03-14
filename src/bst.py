@@ -67,9 +67,9 @@ def build_binary_search_table(filename):
     return build_tree(angles,values)
     
 if __name__ == '__main__':
-    table_filename = "3d_lookup_table2000.txt"
+    table_filename = "2d_lookup_table100000.txt"
     root = build_binary_search_table(table_filename)
-    save_tree(root,"3d_lookup_tree2k.txt")
+    save_tree(root,"2d_lookup_tree100k.txt")
     # imported_tree = load_tree("3d_lookup_tree2k.txt")
     # k = 0
     # print(closest_angle(imported_tree,k)[1]) #integral associated with closest angle to k

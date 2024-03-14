@@ -102,7 +102,10 @@ weights_numba = np.vectorize(weights_numba,excluded=['u','u_lengths','values'])
 
 @jit(types.Array(float64,1,"C")(types.Array(float64,2,"C"),types.Array(float64,1,"C")),nopython=True)
 def fast_lst_sqs(A,b):
-    return np.linalg.lstsq(A,b)[0]
+    lstsq_soln = np.linalg.lstsq(A,b)
+    sing_vals = lstsq_soln[3]
+    print(np.max(sing_vals)/np.min(sing_vals))
+    return lstsq_soln[0]
 
 @timing
 @jit(types.Array(float64,2,"C")(types.Array(float64,3,"C"),types.Array(float64,2,"C")),nopython=True)
@@ -177,8 +180,12 @@ def calculate_tree_graph(points,neighbors=24):
 def calculate_edge_vectors(points,graph):
     #main function
     lengths = graph[0,:,1:] #trim off the first column (all 0s)
+    
     vertices = points[graph[1,:,1:].astype(np.int32)] #ditto as above
     edges = vertices - points[:,np.newaxis] #subtract to get vectors
+    #print(edges[len(edges)//2+1])
+    print("neighbor edges:", edges[len(edges)//2+2])
+    print("vertex:", vertices[len(edges)//2+2])
     return edges,lengths,vertices
 
 def add_source_sink(G,E,lamb):
@@ -273,12 +280,19 @@ if __name__ == "__main__":
     #               ,(-1.0,1.0),(1.0,1.0),(1.0,-1.0),(-1.0,-1.0)\
     #                   ,(-2.0,1.0),(-1.0,2.0),(1.0,2.0),(2.0,1.0)\
     #                       ,(2.0,-1.0),(1.0,-2.0),(-1.0,-2.0),(-2.0,-1.0)])
-    #
-    # u_lengths = np.linalg.norm(u,axis=1)
-    #
-    # result = get_weights(u,u_lengths)
-    # print("Ours: ", [result[0],result[5],result[9]])
-    # print("KRV: ", [0.1221, 0.0476, 0.0454])
+    points = np.array([(0.0,0.0),(-1.0,0.0),(0.0,-1.0)\
+                  ,(-1.0,1.0),(1.0,1.0)\
+                      ,(-2.0,1.0),(-1.0,2.0),(1.0,2.0),(2.0,1.0)\
+                          ])
+    
+    # points_x = np.arange(-25, 25, 1)
+    # points_y = np.arange(-25, 25, 1)
+    # points = np.dstack(np.meshgrid(points_x,points_y)).reshape(-1,2)
+    #u_lengths = np.linalg.norm(u,axis=1)
+    flat_norm(points,np.ones(len(points)),lamb=1.0,neighbors=8)
+    #result = get_weights(u,u_lengths)
+    #print("Ours: ", [result[0],result[5],result[9]])
+    print("KRV: ", [0.1221, 0.0476, 0.0454])
 
     # tick = perf_counter()
     # flat_norm(points, points_disk, lamb=1, neighbors=8)
@@ -287,12 +301,14 @@ if __name__ == "__main__":
     import pstats
     from pstats import SortKey
 
-    points_x = np.linspace(-2, 2, 100)
-    points_y = np.linspace(-2, 2, 100)
-    points = np.dstack(np.meshgrid(points_x,points_y)).reshape((-1,2))
-
-    points_disk = np.linalg.norm(points,axis=1)<=1
-    flat_norm(points, points_disk, lamb=1.0, neighbors=8)
+# =============================================================================
+#     points_x = np.linspace(-2, 2, 100)
+#     points_y = np.linspace(-2, 2, 100)
+#     points = np.dstack(np.meshgrid(points_x,points_y)).reshape((-1,2))
+# 
+#     points_disk = np.linalg.norm(points,axis=1)<=1
+#     flat_norm(points, points_disk, lamb=1.0, neighbors=24)
+# =============================================================================
     #cProfile.run('flat_norm(points, points_disk, lamb=.001, neighbors=8)',"flatnorm")
     #p = pstats.Stats("flatnorm")
     #p.strip_dirs().sort_stats(SortKey.TIME).print_stats(50)

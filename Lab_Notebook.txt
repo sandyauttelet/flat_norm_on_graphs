@@ -14,3 +14,11 @@ estimate for perimeter of circle
 6.117158723854214 using 30x30 grid with 24 nearest neighbors
 
 need to make test for perimeter of sphere
+
+3/12/2024 (Attempts to solve bad conditionin number problem)
+-----------------------------
+Prune lengths and edges to only include ratios of smallest to largest no more than 100
+
+Throw away points that are very close to one another
+
+make symmetric lookup table

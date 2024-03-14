@@ -1,12 +1,19 @@
 import numpy as np
-import cubepy as cp
+#import cubepy as cp
 from time import time
 import bst
 from new_node import newnode
 import pickle
 
-filename = "2d_lookup_tree5k.txt"
-c3_lookup_table = bst.load_tree(filename)
+# filename = "2d_lookup_tree5k.txt"
+# c3_lookup_table = bst.load_tree(filename)
+
+filename = '2d_lookup_table100000.txt'
+#filename = '2d_lookup_table5000.txt'
+
+file = np.loadtxt(filename,delimiter=',')
+
+angles,values = file[:,0],file[:,1]
 
 def integrand_2d(x,ui,uj):
     """call with cp.integrate(integrand,0,2*np.pi,([ui],[uj]))"""
@@ -60,7 +67,7 @@ def c3_2d_integral(u,k,m):
     k_hat = u[k]/k_norm
     m_hat = u[m]/m_norm
     theta_km = np.arccos(np.inner(k_hat,m_hat))
-    result = k_norm*m_norm*bst.closest_angle(c3_lookup_table, theta_km)[1]
+    result = k_norm*m_norm*values[np.searchsorted(angles,theta_km)]
     return result
     # result = cp.integrate(integrand_2d, 0, 2*np.pi, ([u[k]],[u[m]]),itermax=25)
     # return result[0]
@@ -82,7 +89,13 @@ def construct_weights_system(u):
 def solve_weights_system(u):
     #print("edges list in solve_weight_sys:", u)
     A,b = construct_weights_system(u)
-    res = np.linalg.lstsq(A,b,rcond=None)[0]
+    print("A:", A)
+    print("b:", b)
+    lst_sqs_soln = np.linalg.lstsq(A,b,rcond=None)
+    singular_values = lst_sqs_soln[3]
+    print("condition num:", np.max(singular_values)/np.min(singular_values))
+    res = lst_sqs_soln[0]
+    print(res)
     return res 
 
 def get_num_integral(u,k,m):
@@ -121,8 +134,14 @@ def compare_with_paper():
                   ,(-1.0,1.0),(1.0,1.0),(1.0,-1.0),(-1.0,-1.0)\
                       ,(-2.0,1.0),(-1.0,2.0),(1.0,2.0),(2.0,1.0)\
                           ,(2.0,-1.0),(1.0,-2.0),(-1.0,-2.0),(-2.0,-1.0)])
+    # u = np.array([(-1.0,0.0),(0.0,-1.0)\
+    #               ,(-1.0,1.0),(1.0,1.0)\
+    #                   ,(-2.0,1.0),(-1.0,2.0),(1.0,2.0),(2.0,1.0)\
+    #                       ])
+    #u = np.array([(-1.0,0.0),(1.0,0.0),(0.0,-1.0),(0.0,1.0),(-1.0,1.0),(1.0,1.0),(1.0,-1.0),(-1.0,-1.0)])
     result = solve_weights_system(u)
-    print("Ours: ", [result[0],result[5],result[9]])
+    #print("Ours: ", [result[0],result[5],result[9]])
+    print("Ours: ", result)
     print("KRV: ", [0.1221, 0.0476, 0.0454])
     return u,result
     
