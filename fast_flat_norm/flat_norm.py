@@ -104,7 +104,7 @@ weights_numba = np.vectorize(weights_numba,excluded=['u','u_lengths','values'])
 def fast_lst_sqs(A,b):
     lstsq_soln = np.linalg.lstsq(A,b)
     sing_vals = lstsq_soln[3]
-    print(np.max(sing_vals)/np.min(sing_vals))
+    #print(np.max(sing_vals)/np.min(sing_vals))
     return lstsq_soln[0]
 
 @timing
@@ -133,10 +133,8 @@ A_vectorized = np.vectorize(make_A, signature='(m,n),(m)->(m,m)')
 
 @timing
 def get_weights(edges,lengths):
-    #weight_function
     A = A_vectorized(edges,lengths)
     b = make_b(lengths)
-    #weights = solve_vectorized(A,b,rcond=None)[0]
     weights = A_solver(A,b)
     return weights
 
@@ -213,14 +211,8 @@ def flat_norm(points,E,lamb=1.0,perim_only=False,neighbors = 24):
     edges,lengths,vertices = calculate_edge_vectors(points,graph)
     areas = voronoi_areas(points,Tree)
     weights = get_weights(edges, lengths)
-    print(weights[0])
     scaled_weights = np.multiply(weights,areas[:,np.newaxis]).flatten()
-    print(scaled_weights[0])
-    print("smallest weight is:", np.min(scaled_weights))
-    print("largest weight is:", np.max(scaled_weights))
     weightst1 = perf_counter()
-
-
     perimt0 = perf_counter()
     row = weight_indices[:, 0]
     col = weight_indices[:, 1]
