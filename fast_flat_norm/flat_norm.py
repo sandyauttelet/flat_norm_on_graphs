@@ -274,14 +274,14 @@ if __name__ == "__main__":
     #               ,(-1.0,1.0),(1.0,1.0),(1.0,-1.0),(-1.0,-1.0)\
     #                   ,(-2.0,1.0),(-1.0,2.0),(1.0,2.0),(2.0,1.0)\
     #                       ,(2.0,-1.0),(1.0,-2.0),(-1.0,-2.0),(-2.0,-1.0)])
-    points = np.array([(0.0,0.0),(-1.0,0.0),(0.0, -1.0)\
-                  ,(-1.0,1.0),(1.0,1.0)\
-                      ,(-2.0,1.0),(-1.0,2.0),(1.0,2.0),(2.0,1.0)\
-                          ])
+    # points = np.array([(0.0,0.0),(-1.0,0.0),(0.0, -1.0)\
+    #               ,(-1.0,1.0),(1.0,1.0)\
+    #                   ,(-2.0,1.0),(-1.0,2.0),(1.0,2.0),(2.0,1.0)\
+    #                       ])
     
-    # points_x = np.arange(-25, 25, 1)
-    # points_y = np.arange(-25, 25, 1)
-    # points = np.dstack(np.meshgrid(points_x,points_y)).reshape(-1,2)
+    points_x = np.arange(-25, 25, 1)
+    points_y = np.arange(-25, 25, 1)
+    points = np.dstack(np.meshgrid(points_x,points_y)).reshape(-1,2)
     #u_lengths = np.linalg.norm(u,axis=1)
     flat_norm(points,np.ones(len(points)),lamb=1.0,neighbors=8)
     #result = get_weights(u,u_lengths)
